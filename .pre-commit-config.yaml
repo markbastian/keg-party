@@ -1,0 +1,19 @@
+repos:
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.3.0
+      hooks:
+        -   id: check-yaml
+        -   id: end-of-file-fixer
+        -   id: trailing-whitespace
+  - repo: https://github.com/allie-jo/ns-sort.git
+    rev: v1.1.3
+    hooks:
+      - id: ns-sort-docker
+  - repo: https://github.com/allie-jo/cljfmt-docker.git
+    rev: v0.9.1
+    hooks:
+      - id: cljfmt-docker
+  - repo: https://github.com/clj-kondo/clj-kondo
+    rev: v2023.01.12
+    hooks:
+      - id: clj-kondo-docker
