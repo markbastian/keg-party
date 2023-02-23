@@ -20,7 +20,7 @@ Then invite all your friends to the party by doing the following:
 ```
 - In your repl, do the following:
   - `(require '[keg-party.clients.rest-client :as kprc])`
-  - `(add-tap kprc/post-tap-data)`
+  - `(add-tap kprc/tap-in!)`
   - Test it out with by doing something like this:
 
 ```clojure

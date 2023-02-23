@@ -14,6 +14,12 @@
       :body             (u/base64-encode (with-out-str (pp/pprint data)))
       :throw-exceptions false})))
 
+(defn tap-in! []
+  (add-tap post-tap-data))
+
+(defn tap-out! []
+  (remove-tap post-tap-data))
+
 (comment
   (post-tap-data
    '(let [host (env :keg-party-host "http://localhost")
