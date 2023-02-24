@@ -1,8 +1,5 @@
 (ns keg-party.domain
-  (:require [keg-party.htmx-notifications :as htmx-notifications]
-            [keg-party.queries :as queries]))
+  (:require [keg-party.htmx-notifications :as htmx-notifications]))
 
-(defn create-chat-message! [{:keys [clients conn]} username message]
-  ;;Business logic
-  (let [room-name (queries/current-room-name @conn username)]
-    (htmx-notifications/broadcast-to-room clients @conn room-name message)))
+(defn create-tap-message! [{:keys [clients _conn]} client-id message]
+  (htmx-notifications/broadcast-tapped-data clients nil client-id message))

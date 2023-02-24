@@ -9,6 +9,7 @@
   (let [cmdstr (with-out-str (pp/pprint cmd))]
     (log/warnf "Unhandled command: %s\n%s" command cmdstr)))
 
-(defmethod dispatch-command :chat-message
-  [context {:keys [username chat-message]}]
-  (domain/create-chat-message! (update context :clients deref) username chat-message))
+(defmethod dispatch-command :tap-message
+  [context {:keys [command client-id message]}]
+  (log/infof "Dispatching command: %s" command)
+  (domain/create-tap-message! (update context :clients deref) client-id message))

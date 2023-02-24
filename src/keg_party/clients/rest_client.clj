@@ -2,26 +2,35 @@
   (:require [keg-party.utils :as u]
             [clojure.pprint :as pp]
             [environ.core :refer [env]]
-            [hato.client :as hc]))
+            [hato.client :as hc]
+            [nano-id.core :refer [nano-id]]))
 
-(defn post-tap-data [data]
+(defn post-tap-data [client-id data]
   (let [host (env :keg-party-host "http://localhost")
         port (env :keg-party-port "3000")
         url  (cond-> host port (str ":" port))]
     (hc/request
      {:url              url
       :method           :post
-      :body             (u/base64-encode (with-out-str (pp/pprint data)))
+      :body             (u/to-json-str
+                         {:client-id  client-id
+                          :message-id (nano-id 10)
+                          :message    (u/base64-encode (with-out-str (pp/pprint data)))})
       :throw-exceptions false})))
 
-(defn tap-in! []
-  (add-tap post-tap-data))
+(defn tap-in!
+  ([] (add-tap (partial post-tap-data (or
+                                       (env :keg-party-port)
+                                       (env :user)
+                                       "random user"))))
+  ([client-id] (add-tap (partial post-tap-data client-id))))
 
 (defn tap-out! []
   (remove-tap post-tap-data))
 
 (comment
   (post-tap-data
+   (env :user)
    '(let [host (env :keg-party-host "http://localhost")
           port (env :keg-party-port "3000")
           url  (cond-> host port (str ":" port))]

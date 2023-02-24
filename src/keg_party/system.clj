@@ -6,7 +6,7 @@
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [integrant.core :as ig]
-            [parts.datascript.core.core :as ds]
+            [nano-id.core :refer [nano-id]]
             [parts.ring.adapter.jetty9.core :as jetty9]
             [parts.state :as ps]
             [parts.ws-handler :as ws]))
@@ -15,8 +15,10 @@
 (defn tap-echo [context data]
   (commands/dispatch-command
    context
-   {:command      :chat-message
-    :chat-message (with-out-str (pp/pprint data))}))
+   {:client-id (env :user)
+    :message-id (nano-id 10)
+    :command   :tap-message
+    :message   (with-out-str (pp/pprint data))}))
 
 (defmethod ig/init-key ::tap [_ config]
   (log/debug "Launching tap> component")
@@ -28,28 +30,17 @@
   (log/debug "Removing tap> component")
   (remove-tap tap-fn))
 
-(def chat-schema
-  {:username  {:db/unique :db.unique/identity}
-   :room-name {:db/unique :db.unique/identity}
-   :user      {:db/valueType   :db.type/ref
-               :db/cardinality :db.cardinality/one}
-   :room      {:db/valueType   :db.type/ref
-               :db/cardinality :db.cardinality/one}})
-
 (def config
-  {[::chat-state ::ds/conn]    {:schema chat-schema}
-   [::clients-state ::ps/atom] {}
+  {[::clients-state ::ps/atom] {}
    ::ws/ws-handlers            {:on-connect #'ws-handlers/on-connect
                                 :on-text    #'ws-handlers/on-text
                                 :on-close   #'ws-handlers/on-close
                                 :on-error   #'ws-handlers/on-error}
-   ::tap                       {:clients (ig/ref [::clients-state ::ps/atom])
-                                :conn    (ig/ref [::chat-state ::ds/conn])}
+   ::tap                       {:clients (ig/ref [::clients-state ::ps/atom])}
    ::jetty9/server             {:host        "0.0.0.0"
                                 :port        (parse-long (env :keg-party-port "3000"))
                                 :join?       false
                                 :clients     (ig/ref [::clients-state ::ps/atom])
-                                :conn        (ig/ref [::chat-state ::ds/conn])
                                 :ws-handlers (ig/ref ::ws/ws-handlers)
                                 :handler     #'web/handler}})
 
@@ -73,4 +64,12 @@
   (start!)
   (stop!)
   (restart!)
-  (system))
+  (system)
+
+  (tap>
+   '(defn start!
+      ([config]
+       (alter-var-root #'*system* (fn [s] (if-not s (ig/init config) s))))
+      ([] (start! config))))
+
+  (tap> (vec (repeatedly 10 #(vec (repeatedly 10 (fn [] (rand-int 10))))))))

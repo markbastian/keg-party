@@ -2,6 +2,7 @@
   (:require [keg-party.commands :as commands]
             [keg-party.pages :as chat-pages]
             [keg-party.utils :as u]
+            [clojure.tools.logging :as log]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as coercion]
             [reitit.ring.middleware.muuntaja :as muuntaja]
@@ -27,6 +28,7 @@
 
 (defn ws-handler
   ([request]
+   (log/info "Upgrading request to web socket")
    (if (jetty/ws-upgrade-request? request)
      (jetty/ws-upgrade-response (partial ws-upgrade-handler request))
      (internal-server-error "Cannot upgrade request")))
@@ -34,21 +36,26 @@
    (resp (ws-handler request))))
 
 (defn chatroom-page-handler [request]
+  (log/info "Returning landing page")
   (ok (chat-pages/landing-page request)))
 
 (defn post-message-handler [{:keys [body] :as request}]
-  (let [m (u/base64-decode (slurp body))]
+  (log/info "Posting message")
+  (let [{:keys [client-id message]} (u/read-json body)
+        message (u/base64-decode message)]
     (commands/dispatch-command
      request
-     {:command      :chat-message
-      :chat-message m})
-    (ok m)))
+     {:command      :tap-message
+      :client-id    client-id
+      :message message})
+    (ok message)))
 
 (def routes
   [["/" {:get  chatroom-page-handler
          :post post-message-handler}]
    ["/ws/:client-id" {:handler    ws-handler
-                      :parameters {:path {:client-id string?}}}]])
+                      :parameters {:path {:client-id string?}}}]
+   ["/public/*" (ring/create-file-handler {:root "resources"})]])
 
 (def handler
   (ring/ring-handler
@@ -65,4 +72,5 @@
                          muuntaja/format-request-middleware
                          coercion/coerce-response-middleware
                          coercion/coerce-request-middleware]}})
+   ;(ring/create-file-handler {:path "/resources/"})
    (constantly (not-found "Not found"))))

@@ -1,6 +1,8 @@
 (ns keg-party.clients.websocket-client
   (:require [keg-party.utils :as u]
-            [hato.websocket :as ws])
+            [environ.core :refer [env]]
+            [hato.websocket :as ws]
+            [nano-id.core :refer [nano-id]])
   (:import java.util.Date))
 
 #_:clj-kondo/ignore
@@ -11,7 +13,9 @@
                            :on-close   (fn [ws status reason]
                                          (println "WebSocket closed!"))})]
     (ws/send! ws (u/to-json-str
-                  {:HEADERS      {:HX-Trigger-Name "chat-message"}
-                   :chat-message (str "TIME: " (Date.))}))
+                  {:HEADERS      {:HX-Trigger-Name "tap-message"}
+                   :client-id (env :user)
+                   :message-id (nano-id 10)
+                   :message (str "TIME: " (Date.))}))
     (Thread/sleep 1000)
     (ws/close! ws)))

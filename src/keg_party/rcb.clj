@@ -12,6 +12,6 @@
         clients (get (system/system) client-state-key)]
     (commands/dispatch-command
      {:conn conn :clients clients}
-     {:command      :chat-message
+     {:command      :tap-message
       :client-id    "Mark"
-      :chat-message "What's going on!!!aaa"})))
+      :message "What's going on!!!aaa"})))

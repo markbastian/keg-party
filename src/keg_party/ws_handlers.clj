@@ -15,9 +15,10 @@
         {:keys [HEADERS] :as json} (u/read-json text-message)
         command (-> json
                     (assoc
-                     :username client-id
+                     :client-id client-id
                      :command (some-> HEADERS :HX-Trigger-Name keyword))
                     (dissoc :HEADERS))]
+    (log/debugf "client-id: %s command: %s" client-id command)
     (commands/dispatch-command context command)))
 
 (defn on-close [{:keys [path-params clients]} _ws _status-code _reason]
