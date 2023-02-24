@@ -20,7 +20,7 @@
 
 (defn tap-in!
   ([] (add-tap (partial post-tap-data (or
-                                       (env :keg-party-port)
+                                       (env :keg-party-user-id)
                                        (env :user)
                                        "random user"))))
   ([client-id] (add-tap (partial post-tap-data client-id))))
