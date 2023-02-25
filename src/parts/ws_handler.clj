@@ -2,15 +2,21 @@
   (:require
    [clojure.tools.logging :as log]
    [integrant.core :as ig]
-   [ring.adapter.jetty9 :as jetty]))
+   [ring.adapter.jetty9 :as jetty])
+  (:import (java.nio ByteBuffer)))
 
 (defn on-bytes [_context _ _ _ _]
   (println "on-bytes unhandled"))
 
-(defn on-ping [_context ws payload] (println "PING")
-  (jetty/send! ws payload))
+(defn on-ping [_context ws ^ByteBuffer bytebuffer]
+  (jetty/send! ws bytebuffer))
 
-(defn on-pong [_context _ _] (println "PONG"))
+(defn on-pong [_context _ws ^ByteBuffer bytebuffer]
+  (let [message (loop [res []]
+                  (if (.hasRemaining bytebuffer)
+                    (recur (conj res (.get bytebuffer)))
+                    (String. (byte-array res))))]
+    (log/debugf "Received pong: %s" message)))
 
 (defmethod ig/init-key ::ws-handlers [_ config]
   (log/debug "Configuring websocket handlers.")

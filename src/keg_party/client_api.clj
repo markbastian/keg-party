@@ -1,12 +1,21 @@
 (ns keg-party.client-api
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.core.async :as async]
+            [clojure.tools.logging :as log]
             [ring.adapter.jetty9 :as jetty]))
+
+(defn keepalive [state {:keys [client-id]}]
+  (async/go-loop []
+    (async/<! (async/timeout (* 60 1000)))
+    (when-let [{:keys [ws]} (@state client-id)]
+      (jetty/ping! ws client-id)
+      (recur))))
 
 (defn add-client! [state {:keys [client-id] :as m}]
   (if-not (@state client-id)
     (do
       (log/debugf "Adding client: %s" client-id)
-      (swap! state assoc client-id m))
+      (swap! state assoc client-id m)
+      (keepalive state m))
     (log/debugf "Client '%s' already exists. Not adding." client-id)))
 
 (defn remove-client! [state client-id]

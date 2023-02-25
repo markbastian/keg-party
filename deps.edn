@@ -11,6 +11,7 @@
          metosin/ring-http-response     {:mvn/version "0.9.3"}
          nano-id/nano-id                {:mvn/version "1.0.0"}
          org.clojure/clojure            {:mvn/version "1.11.1"}
+         org.clojure/core.async         {:mvn/version "1.6.673"}
          org.clojure/tools.logging      {:mvn/version "1.2.4"}
          org.xerial/sqlite-jdbc         {:mvn/version "3.40.0.0"}
          ring/ring                      {:mvn/version "1.9.6"}
@@ -38,4 +39,9 @@
             :exec-args    {:installer :local :artifact "keg-party.jar"}}
   :deploy  {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
             :exec-fn      deps-deploy.deps-deploy/deploy
-            :exec-args    {:installer :remote :artifact "keg-party.jar"}}}}
+            :exec-args    {:installer :remote :artifact "keg-party.jar"}}
+  ;; Not ready yet
+  ;:tap-in  {:exec-fn   keg-party.clients.rest-client/tap-launcher
+  ;          :exec-args {:host "http://localhost"
+  ;                      :port 3000}}
+  }}
