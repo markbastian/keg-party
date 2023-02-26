@@ -31,9 +31,8 @@
      {:id id}
      [:p client-id]
      [:div
-      {:style "display:flex; flex-direction: row; align-items: center"}
+      {:style "display:flex; justify-content: space-between; flex-direction: row; align-items: center"}
       [:div
-       {:style "justify-content: left;"}
        [:pre
         [:code.language-clojure message]]]
       [:div
