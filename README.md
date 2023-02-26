@@ -54,6 +54,8 @@ Build a deployable jar of this library (Still needs work):
     $ clojure -X:jar
 
 ## TODOs
+- [ ] Fix UI so everything isn't mashed to the left
+- [ ] Persistence
 - [ ] Add args for deps so we can easily launch with -X args
 - [ ] Add client profile so you can just add the profile and connect the tap at launch
 

@@ -24,31 +24,45 @@
   (into [:div#notifications] r))
 
 ;; TODO: Use message uuid to assign ids to code blocks.
-(defn code-block [client-id message]
-  [:div
-   [:p client-id]
-   [:div
-    {:style "display:flex; flex-direction: row; align-items: center"}
+(defn code-block [client-id message-id message]
+  (println message-id)
+  (let [id (format "code-block-%s" message-id)]
     [:div
-     {:style "justify-content: left;"}
-     [:pre
-      [:code.language-clojure message]]]
-    [:div
-     [:button.btn.btn-dark.btn-sm
-      {:onclick (format
-                 "navigator.clipboard.writeText(atob('%s'))"
-                 (u/base64-encode message))}
-      [:i.fa-solid.fa-copy]]
-     #_[:button.btn.btn-dark.btn-sm
-        {:hx-delete "/tap" :hx-target "body"}
+     {:id id}
+     [:p client-id]
+     [:div
+      {:style "display:flex; flex-direction: row; align-items: center"}
+      [:div
+       {:style "justify-content: left;"}
+       [:pre
+        [:code.language-clojure message]]]
+      [:div
+       [:button.btn.btn-dark.btn-sm
+        {:onclick (format
+                   "navigator.clipboard.writeText(atob('%s'))"
+                   (u/base64-encode message))}
+        [:i.fa-solid.fa-copy]]
+       [:button.btn.btn-dark.btn-sm
+        {:ws-send "true"
+         :hx-vals (u/to-json-str {:command    :delete-message
+                                  :message-id message-id})
+         :name    "delete-message"}
         [:i.fa-solid.fa-trash]]]]
-   [:hr]
-   [:script "hljs.highlightAll();"]])
+     [:hr]
+     [:script "hljs.highlightAll();"]]))
 
 (def chat-pane
   [:div#chat.overflow-scroll
    [:div.p-2
     (notifications-pane)]])
+
+;(defn occupied-rooms-list [rooms-names]
+;  (let [attrs {:ws-send "true" :name "change-room" :method :post}
+;        f (fn [room-name]
+;            (sidebar-sublist-item
+;             room-name
+;             (assoc attrs :hx-vals (u/to-json-str {:room-name room-name}))))]
+;    (->> rooms-names sort (map f))))
 
 (defn navbar []
   [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top

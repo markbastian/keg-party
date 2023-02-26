@@ -3,9 +3,15 @@
             [keg-party.pages :as chat-pages]
             [hiccup.page :refer [html5]]))
 
-(defn broadcast-tapped-data [clients _db client-id message]
+(defn broadcast-tapped-data [clients _db client-id message-id message]
   (let [html (html5
               (chat-pages/notifications-pane
                {:hx-swap-oob "afterbegin"}
-               (chat-pages/code-block client-id message)))]
+               (chat-pages/code-block client-id message-id message)))]
+    (client-api/broadcast! clients (keys clients) html)))
+
+(defn broadcast-delete-data [clients _db message-id]
+  (let [html (html5
+              [:div {:id          (format "code-block-%s" message-id)
+                     :hx-swap-oob "true"}])]
     (client-api/broadcast! clients (keys clients) html)))

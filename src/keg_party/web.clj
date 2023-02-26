@@ -45,9 +45,9 @@
         message (u/base64-decode message)]
     (commands/dispatch-command
      request
-     {:command      :tap-message
-      :client-id    client-id
-      :message message})
+     {:command   :tap-message
+      :client-id client-id
+      :message   message})
     (ok message)))
 
 (def routes
