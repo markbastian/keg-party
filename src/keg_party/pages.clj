@@ -30,12 +30,11 @@
     [:div
      {:id id}
      [:p client-id]
-     [:div
-      {:style "display:flex; justify-content: space-between; flex-direction: row; align-items: center"}
+     [:div.d-flex.justify-content-between.align-items-center
       [:div
        [:pre
         [:code.language-clojure message]]]
-      [:div
+      [:div.d-flex.flex-column.gap-1
        [:button.btn.btn-dark.btn-sm
         {:onclick (format
                    "navigator.clipboard.writeText(atob('%s'))"
@@ -55,29 +54,10 @@
    [:div.p-2
     (notifications-pane)]])
 
-;(defn occupied-rooms-list [rooms-names]
-;  (let [attrs {:ws-send "true" :name "change-room" :method :post}
-;        f (fn [room-name]
-;            (sidebar-sublist-item
-;             room-name
-;             (assoc attrs :hx-vals (u/to-json-str {:room-name room-name}))))]
-;    (->> rooms-names sort (map f))))
-
 (defn navbar []
   [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top
-   ;[:a.navbar-brand {:href "#"} "Keg Party"]
    [:a.navbar-brand.mx-auto {:href "#"}
-    [:img {:src "public/keg_party/rootbeer-sm.png" :width "30" :height "30" :alt ""}]]
-   #_[:div.container-fluid
-      [:button.navbar-toggler
-       {:type           "button"
-        :data-bs-toggle "collapse"
-        :data-bs-target "#navbarToggler"}
-       [:span.navbar-toggler-icon]]
-      #_[:div#navbarToggler.collapse.navbar-collapse
-         [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
-          (navbar-list "Rooms" "roomList")
-          (navbar-list "Users" "userList")]]]])
+    [:img {:src "public/keg_party/rootbeer-sm.png" :width "30" :height "30" :alt ""}]]])
 
 (defn chat-page [{:keys [params] :as _request}]
   (let [{:keys [client-id]} params]
