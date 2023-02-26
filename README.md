@@ -19,7 +19,7 @@ Then invite all your friends to the party by doing the following:
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         com.markbastian/keg-party
         {:git/url "https://github.com/markbastian/keg-party"
-         :sha     "d7594bb4a306e44c539c7ff3cf77f2179d41b7e2"}}
+         :sha     "88c57ab4f0db6b78dcf5d4d307fa24ef5b83d817"}}
 ```
 
 - In your repl, do the following:
