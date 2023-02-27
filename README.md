@@ -10,6 +10,7 @@ Start your party by launching a server with:
 - Build an uberjar with `clojure -X:uberjar` then run it
   with `java -jar keg-party.jar`
 - If you accept the defaults, it will be running at `http://localhost:3000/`
+  - If you're doing web dev on 3000 (the default keg party port), run on another port with something like `KEG_PARTY_PORT=3333 clj -X keg-party.main/run`
 
 Then invite all your friends to the party by doing the following:
 
@@ -23,6 +24,7 @@ Then invite all your friends to the party by doing the following:
 ```
 
 - In your repl, do the following:
+    - If you aren't using the default port, ensure your app has the `KEG_PARTY_PORT` environment variable set
     - `(require '[keg-party.clients.rest-client :as kprc])`
     - `(kprc/tap-in!)` or `(kprc/tap-in! "username")` where username is whatever
       username or id you want to show up in the tap stream. When no username is
