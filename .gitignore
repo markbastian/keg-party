@@ -18,3 +18,4 @@
 *.iml
 .DS_Store
 pom.xml
+chat-state

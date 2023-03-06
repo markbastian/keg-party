@@ -1,5 +1,6 @@
 (ns keg-party.system
   (:require [keg-party.commands :as commands]
+            [keg-party.migrations :as sql-migrations]
             [keg-party.utils :as u]
             [keg-party.web :as web]
             [keg-party.ws-handlers :as ws-handlers]
@@ -8,7 +9,7 @@
             [environ.core :refer [env]]
             [integrant.core :as ig]
             [nano-id.core :refer [nano-id]]
-            ;[parts.next.jdbc.core :as parts.jdbc]
+            [parts.next.jdbc.core :as parts.jdbc]
             [parts.ring.adapter.jetty9.core :as jetty9]
             [parts.state :as ps]
             [parts.ws-handler :as ws]))
@@ -39,19 +40,18 @@
                                 :on-text    #'ws-handlers/on-text
                                 :on-close   #'ws-handlers/on-close
                                 :on-error   #'ws-handlers/on-error}
-   ;::parts.jdbc/datasource     {:dbtype       "sqlite"
-   ;                             :dbname       "chat-state"
-   ;                             :foreign_keys "on"}
-   ;::parts.jdbc/migrations     {:db         (ig/ref ::parts.jdbc/datasource)
-   ;                             :migrations [sql-migrations/create-room-table-sql
-   ;                                          sql-migrations/create-user-table-sql
-   ;                                          sql-migrations/create-message-table-sql
-   ;                                          sql-migrations/create-outbox-table-sql]}
+   ::parts.jdbc/datasource     {:dbtype       "sqlite"
+                                :dbname       "chat-state"
+                                :foreign_keys "on"}
+   ::parts.jdbc/migrations     {:db         (ig/ref ::parts.jdbc/datasource)
+                                :migrations [sql-migrations/create-user-table-sql
+                                             sql-migrations/create-message-table-sql]}
    ::tap                       {:clients (ig/ref [::clients-state ::ps/atom])}
    ::jetty9/server             {:host        "0.0.0.0"
                                 :port        (parse-long (env :keg-party-port "3000"))
                                 :join?       false
                                 :clients     (ig/ref [::clients-state ::ps/atom])
+                                :conn        ::parts.jdbc/datasource
                                 :ws-handlers (ig/ref ::ws/ws-handlers)
                                 :handler     #'web/handler}})
 
