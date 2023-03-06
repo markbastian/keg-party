@@ -24,7 +24,7 @@
   (into [:div#notifications] r))
 
 ;; TODO: Use message uuid to assign ids to code blocks.
-(defn code-block [client-id message-id message]
+(defn code-block [client-id message-id message stack]
   (println message-id)
   (let [id (format "code-block-%s" message-id)]
     [:div
@@ -45,7 +45,12 @@
          :hx-vals (u/to-json-str {:command    :delete-message
                                   :message-id message-id})
          :name    "delete-message"}
-        [:i.fa-solid.fa-trash]]]]
+        [:i.fa-solid.fa-trash]]
+       [:button.btn.btn-dark.btn-sm
+        {:onclick (format
+                   "navigator.clipboard.writeText(atob('%s'))"
+                   (u/base64-encode stack))}
+        [:i.fa-solid.fa-list]]]]
      [:hr]
      [:script "hljs.highlightAll();"]]))
 

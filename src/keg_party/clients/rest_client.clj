@@ -8,14 +8,17 @@
 (defn post-tap-data [client-id data]
   (let [host (env :keg-party-host "http://localhost")
         port (env :keg-party-port "3000")
-        url  (cond-> host port (str ":" port))]
+        url  (cond-> host port (str ":" port))
+        stack (vec (drop 2 (u/stack-dump)))]
     (hc/request
      {:url              url
       :method           :post
       :body             (u/to-json-str
                          {:client-id  client-id
                           :message-id (nano-id 10)
-                          :message    (u/base64-encode (with-out-str (pp/pprint data)))})
+                          ;; TODO gzip on both ends
+                          :message    (u/base64-encode (with-out-str (pp/pprint data)))
+                          :stack      (u/base64-encode (with-out-str (pp/pprint stack)))})
       :throw-exceptions false})))
 
 (defn tap-in!
@@ -29,12 +32,13 @@
   (remove-tap post-tap-data))
 
 (comment
-  (post-tap-data
-   (env :user)
-   '(let [host (env :keg-party-host "http://localhost")
-          port (env :keg-party-port "3000")
-          url  (cond-> host port (str ":" port))]
-      (hc/request
-       {:url    url
-        :method :post
-        :body   [1 2 3 4]}))))
+  (some?
+   (post-tap-data
+    (env :user)
+    '(let [host (env :keg-party-host "http://localhost")
+           port (env :keg-party-port "3000")
+           url  (cond-> host port (str ":" port))]
+       (hc/request
+        {:url    url
+         :method :post
+         :body   [1 2 3 4]})))))

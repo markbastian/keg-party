@@ -1,23 +1,25 @@
 ;; https://github.com/practicalli/clojure-deps-edn
 {:paths ["src" "resources"]
- :deps  {ch.qos.logback/logback-classic {:mvn/version "1.4.5"}
-         datascript/datascript          {:mvn/version "1.3.15"}
-         environ/environ                {:mvn/version "1.2.0"}
-         hato/hato                      {:mvn/version "0.9.0"}
-         hiccup/hiccup                  {:mvn/version "1.0.5"}
-         info.sunng/ring-jetty9-adapter {:mvn/version "0.18.1"}
-         integrant/integrant            {:mvn/version "0.8.0"}
-         metosin/jsonista               {:mvn/version "0.3.6"}
-         metosin/reitit                 {:mvn/version "0.5.18"}
-         metosin/ring-http-response     {:mvn/version "0.9.3"}
-         nano-id/nano-id                {:mvn/version "1.0.0"}
-         org.clojure/clojure            {:mvn/version "1.11.1"}
-         org.clojure/core.async         {:mvn/version "1.6.673"}
-         org.clojure/tools.logging      {:mvn/version "1.2.4"}
-         org.xerial/sqlite-jdbc         {:mvn/version "3.40.0.0"}
-         ring/ring                      {:mvn/version "1.9.6"}
-         ring/ring-defaults             {:mvn/version "0.3.4"}
-         ring/ring-json                 {:mvn/version "0.5.1"}}
+ :deps  {ch.qos.logback/logback-classic    {:mvn/version "1.4.5"}
+         com.github.seancorfield/honeysql  {:mvn/version "2.4.947"}
+         com.github.seancorfield/next.jdbc {:mvn/version "1.3.847"}
+         datascript/datascript             {:mvn/version "1.3.15"}
+         environ/environ                   {:mvn/version "1.2.0"}
+         hato/hato                         {:mvn/version "0.9.0"}
+         hiccup/hiccup                     {:mvn/version "1.0.5"}
+         info.sunng/ring-jetty9-adapter    {:mvn/version "0.18.1"}
+         integrant/integrant               {:mvn/version "0.8.0"}
+         metosin/jsonista                  {:mvn/version "0.3.6"}
+         metosin/reitit                    {:mvn/version "0.5.18"}
+         metosin/ring-http-response        {:mvn/version "0.9.3"}
+         nano-id/nano-id                   {:mvn/version "1.0.0"}
+         org.clojure/clojure               {:mvn/version "1.11.1"}
+         org.clojure/core.async            {:mvn/version "1.6.673"}
+         org.clojure/tools.logging         {:mvn/version "1.2.4"}
+         org.xerial/sqlite-jdbc            {:mvn/version "3.40.0.0"}
+         ring/ring                         {:mvn/version "1.9.6"}
+         ring/ring-defaults                {:mvn/version "0.3.4"}
+         ring/ring-json                    {:mvn/version "0.5.1"}}
  :aliases
  {:test    {:extra-paths ["test"]
             :extra-deps  {org.clojure/test.check {:mvn/version "1.1.0"}}}

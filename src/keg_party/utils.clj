@@ -1,6 +1,7 @@
 (ns keg-party.utils
   (:require
    [clojure.pprint :as pp]
+   [clojure.string :as str]
    [jsonista.core :as j])
   (:import (java.util Base64)))
 
@@ -22,3 +23,13 @@
 
 (defn base64-decode [^String s]
   (String. (.decode (Base64/getDecoder) s)))
+
+(defn stack-dump []
+  (for [ste (.getStackTrace (Thread/currentThread))
+        :let [{:keys [className fileName lineNumber]} (bean ste)]
+        :when (str/includes? className "keg_party")
+        :let [[n f] (str/split className #"\$")]]
+    {:ns (symbol (str/replace n "_" "-"))
+     :fn (symbol f)
+     :file fileName
+     :line lineNumber}))

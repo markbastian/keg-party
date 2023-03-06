@@ -10,9 +10,10 @@
     (log/warnf "Unhandled command: %s\n%s" command cmdstr)))
 
 (defmethod dispatch-command :tap-message
-  [context {:keys [command client-id message-id message]}]
+  [context {:keys [command client-id message-id stack message] :as m}]
+  {:pre [client-id message-id stack message]}
   (log/infof "Dispatching command: %s" command)
-  (domain/create-tap-message! (update context :clients deref) client-id message-id message))
+  (domain/create-tap-message! (update context :clients deref) m))
 
 (defmethod dispatch-command :delete-message
   [context {:keys [command message-id]}]
