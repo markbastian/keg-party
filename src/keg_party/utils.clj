@@ -27,7 +27,7 @@
 (defn stack-dump []
   (for [ste (.getStackTrace (Thread/currentThread))
         :let [{:keys [className fileName lineNumber]} (bean ste)]
-        :when (str/includes? className "keg_party")
+        ;:when (str/includes? className "keg_party")
         :let [[n f] (str/split className #"\$")]]
     {:ns (symbol (str/replace n "_" "-"))
      :fn (symbol f)
