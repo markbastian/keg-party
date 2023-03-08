@@ -6,12 +6,11 @@
 
 (defn run [_]
   (system/start!)
-  ())
-
-(defn -main
-  [& _args]
-  (system/start!)
   (let [host (env :keg-party-host "http://localhost")
         port (env :keg-party-port "3333")
         url  (cond-> host port (str ":" port))]
     (browse-url url)))
+
+(defn -main
+  [& _args]
+  (system/start!))
