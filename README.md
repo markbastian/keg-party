@@ -4,17 +4,20 @@
 
 ## Usage
 
-Start your party by launching a server with:
+### Launch the server
 
-- `clj -X keg-party.main/run`
-- Build an uberjar with `clojure -X:uberjar` then run it
-  with `java -jar keg-party.jar`
-- If you accept the defaults, it will be running at `http://localhost:3000/`
-  - If you're doing web dev on 3000 (the default keg party port), run on another port with something like `KEG_PARTY_PORT=3333 clj -X keg-party.main/run`
+Start your party by launching a server with one of the following options:
+
+- `clj -X keg-party.main/run` from the cloned project
+- Build an uberjar with `clojure -X:uberjar` then run it with `java -jar keg-party.jar`
+
+By default, the server will run at `http://localhost:3333/`. You can change these defaults as described in the configuration section below.
+
+### Connect your client
 
 Then invite all your friends to the party by doing the following:
 
-- Add this project to your `deps.edn` file as a dependency, like so:
+- Add `keg-party` as a dependency to your project. The suggested way is to add it to your `~/.clojure/deps.edn` file like so:
 
 ```clojure
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
@@ -23,13 +26,25 @@ Then invite all your friends to the party by doing the following:
          :sha     "05a21d9c88eef6b1a1928b6053d30618c0983b0a"}}
 ```
 
-- In your repl, do the following:
-    - If you aren't using the default port, ensure your app has the `KEG_PARTY_PORT` environment variable set
+- Connect the tap target. Note that your env vars need to be configured correctly if you aren't using the defaults.
+  - The manual way is to invoke the following commands in sequence:
     - `(require '[keg-party.clients.rest-client :as kprc])`
-    - `(kprc/tap-in!)` or `(kprc/tap-in! "username")` where username is whatever
-      username or id you want to show up in the tap stream. When no username is
-      provided the env user is used.
-    - Test it out with by doing something like this:
+    - `(kprc/tap-in!)` or `(kprc/tap-in! "username")`
+  - For an automated experience, do the following:
+    - Create a local dev or user profile (e.g. add `:dev {:extra-paths ["dev"]}` to your `~/.clojure/deps.edn` `:alias`es)
+    - In that profile's extra paths, add a ns that looks something like this:
+
+```clojure
+(ns user
+  (:require [keg-party.clients.rest-client :as kprc]))
+
+(println "KEG PARTY TAPPING IN")
+(kprc/tap-in!)
+```
+
+Ensure that this profile is active when you launch your REPL. When you do so, this code will be run and you are good to go.
+
+- Test it out with by doing something like this:
 
 ```clojure
 (tap> {:best-drink-ever     :diet-dew
@@ -43,7 +58,15 @@ Then invite all your friends to the party by doing the following:
 The following environment variables may be set:
 
 - `KEG_PARTY_HOST`, defaults to http://localhost
-- `KEG_PARTY_PORT`, defaults to 3000
+- `KEG_PARTY_PORT`, defaults to 3333
+- `KEG_PARTY_EXCLUDES_REGEX`, what not to save in the stack trace dump of your tap. Defaults to `"java.*|clojure.*|nrepl.*"`
+- `KEG_PARTY_INCLUDES_REGEX`, what to save in the stack trace dump of your tap. No default, but you might want to set it to your root ns regex (e.g. `"keg-party.*"`)
+
+Protip: Launch using Clojure deps prefixed with env vars like so:
+
+```clojure
+KEG_PARTY_PORT=3333 KEG_PARTY_INCLUDES_REGEX=my-project-ns.* clj -X keg-party.main/run
+```
 
 ## Misc
 

@@ -7,7 +7,7 @@
 
 #_:clj-kondo/ignore
 (comment
-  (let [ws @(ws/websocket "ws://localhost:3000/ws/x"
+  (let [ws @(ws/websocket "ws://localhost:3333/ws/x"
                           {:on-message (fn [ws msg last?]
                                          (println "Received message:" msg))
                            :on-close   (fn [ws status reason]

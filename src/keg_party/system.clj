@@ -1,38 +1,13 @@
 (ns keg-party.system
-  (:require [keg-party.commands :as commands]
-            [keg-party.migrations :as sql-migrations]
-            [keg-party.utils :as u]
+  (:require [keg-party.migrations :as sql-migrations]
             [keg-party.web :as web]
             [keg-party.ws-handlers :as ws-handlers]
-            [clojure.pprint :as pp]
-            [clojure.tools.logging :as log]
             [environ.core :refer [env]]
             [integrant.core :as ig]
-            [nano-id.core :refer [nano-id]]
             [parts.next.jdbc.core :as parts.jdbc]
             [parts.ring.adapter.jetty9.core :as jetty9]
             [parts.state :as ps]
             [parts.ws-handler :as ws]))
-
-;; TODO - Add stack trace to this and use with reporting in UI
-(defn tap-echo [context data]
-  (commands/dispatch-command
-   context
-   {:client-id  (env :user)
-    :message-id (nano-id 10)
-    :command    :tap-message
-    :message    (with-out-str (pp/pprint data))
-    :stack      (with-out-str (pp/pprint (u/stack-dump)))}))
-
-(defmethod ig/init-key ::tap [_ config]
-  (log/debug "Launching tap> component")
-  (let [tap-fn (partial tap-echo config)]
-    (add-tap tap-fn)
-    tap-fn))
-
-(defmethod ig/halt-key! ::tap [_ tap-fn]
-  (log/debug "Removing tap> component")
-  (remove-tap tap-fn))
 
 (def config
   {[::clients-state ::ps/atom] {}
@@ -46,9 +21,8 @@
    ::parts.jdbc/migrations     {:db         (ig/ref ::parts.jdbc/datasource)
                                 :migrations [sql-migrations/create-user-table-sql
                                              sql-migrations/create-message-table-sql]}
-   ::tap                       {:clients (ig/ref [::clients-state ::ps/atom])}
    ::jetty9/server             {:host        "0.0.0.0"
-                                :port        (parse-long (env :keg-party-port "3000"))
+                                :port        (parse-long (env :keg-party-port "3333"))
                                 :join?       false
                                 :clients     (ig/ref [::clients-state ::ps/atom])
                                 :conn        ::parts.jdbc/datasource

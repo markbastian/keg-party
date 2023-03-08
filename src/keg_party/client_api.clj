@@ -5,7 +5,7 @@
 
 (defn keepalive [state {:keys [client-id]}]
   (async/go-loop []
-    (async/<! (async/timeout (* 60 1000)))
+    (async/<! (async/timeout (* 2 60 1000)))
     (when-let [{:keys [ws]} (@state client-id)]
       (jetty/ping! ws client-id)
       (recur))))

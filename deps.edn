@@ -43,6 +43,8 @@
   :deploy  {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
             :exec-fn      deps-deploy.deps-deploy/deploy
             :exec-args    {:installer :remote :artifact "keg-party.jar"}}
+  :tap-in  {;:exec-fn   keg-party.clients.rest-client/foo
+            :main-opts ["-m" "keg-party.clients.rest-client"]}
   ;; Not ready yet
   ;:tap-in  {:exec-fn   keg-party.clients.rest-client/tap-launcher
   ;          :exec-args {:host "http://localhost"

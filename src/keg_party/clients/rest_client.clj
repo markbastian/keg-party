@@ -7,9 +7,11 @@
 
 (defn post-tap-data [client-id data]
   (let [host (env :keg-party-host "http://localhost")
-        port (env :keg-party-port "3000")
+        port (env :keg-party-port "3333")
         url  (cond-> host port (str ":" port))
-        stack (vec (drop 2 (u/stack-dump)))]
+        v (vec (u/stack-dump))
+        c (count v)
+        stack (cond-> v (> c 0) pop (> c 1) pop)]
     (hc/request
      {:url              url
       :method           :post
@@ -36,7 +38,7 @@
    (post-tap-data
     (env :user)
     '(let [host (env :keg-party-host "http://localhost")
-           port (env :keg-party-port "3000")
+           port (env :keg-party-port "3333")
            url  (cond-> host port (str ":" port))]
        (hc/request
         {:url    url

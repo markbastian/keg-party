@@ -16,7 +16,7 @@
                   (if (.hasRemaining bytebuffer)
                     (recur (conj res (.get bytebuffer)))
                     (String. (byte-array res))))]
-    (log/debugf "Received pong: %s" message)))
+    (log/tracef "Received pong: %s" message)))
 
 (defmethod ig/init-key ::ws-handlers [_ config]
   (log/debug "Configuring websocket handlers.")
