@@ -11,7 +11,7 @@ Start your party by launching a server with one of the following options:
 - `clj -X keg-party.main/run` from the cloned project
 - Build an uberjar with `clojure -X:uberjar` then run it with `java -jar keg-party.jar`
 
-By default, the server will run at `http://localhost:3333/`. You can change these defaults as described in the configuration section below.
+By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the configuration section below.
 
 ### Connect your client
 
