@@ -8,10 +8,7 @@
 (defn post-tap-data [client-id data]
   (let [host (env :keg-party-host "http://localhost")
         port (env :keg-party-port "3333")
-        url  (cond-> host port (str ":" port))
-        v (vec (u/stack-dump))
-        c (count v)
-        stack (cond-> v (> c 0) pop (> c 1) pop)]
+        url  (cond-> host port (str ":" port))]
     (hc/request
      {:url              url
       :method           :post
@@ -19,8 +16,7 @@
                          {:client-id  client-id
                           :message-id (nano-id 10)
                           ;; TODO gzip on both ends
-                          :message    (u/base64-encode (with-out-str (pp/pprint data)))
-                          :stack      (u/base64-encode (with-out-str (pp/pprint stack)))})
+                          :message    (u/base64-encode (with-out-str (pp/pprint data)))})
       :throw-exceptions false})))
 
 (defn tap-in!

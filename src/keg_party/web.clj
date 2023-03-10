@@ -43,9 +43,8 @@
   (log/info "Posting message")
   (let [{:keys [message-id] :as m}
         (-> (u/read-json body)
-            (select-keys [:client-id :message-id :message :stack])
+            (select-keys [:client-id :message-id :message])
             (update :message u/base64-decode)
-            (update :stack u/base64-decode)
             (assoc :command :tap-message))]
     (commands/dispatch-command request m)
     (ok message-id)))

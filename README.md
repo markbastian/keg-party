@@ -59,8 +59,6 @@ The following environment variables may be set:
 
 - `KEG_PARTY_HOST`, defaults to http://localhost
 - `KEG_PARTY_PORT`, defaults to 3333
-- `KEG_PARTY_EXCLUDES_REGEX`, what not to save in the stack trace dump of your tap. Defaults to `"java.*|clojure.*|nrepl.*"`
-- `KEG_PARTY_INCLUDES_REGEX`, what to save in the stack trace dump of your tap. No default, but you might want to set it to your root ns regex (e.g. `"keg-party.*"`)
 
 Protip: Launch using Clojure deps prefixed with env vars like so:
 

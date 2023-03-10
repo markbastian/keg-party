@@ -24,16 +24,17 @@
   (into [:div#notifications] r))
 
 ;; TODO: Use message uuid to assign ids to code blocks.
-(defn code-block [client-id message-id message stack]
+(defn code-block [client-id message-id message]
   (println message-id)
   (let [id (format "code-block-%s" message-id)]
     [:div
      {:id id}
      [:p client-id]
-     [:div.d-flex.justify-content-between.align-items-center
-      [:div
+     [:div.d-flex.justify-content-between.align-items-top
+      [:div.overflow-auto
        [:pre
-        [:code.language-clojure message]]]
+        [:code.language-clojure message]]
+       [:script "hljs.highlightAll();"]]
       [:div.d-flex.flex-column.gap-1
        [:button.btn.btn-dark.btn-sm
         {:onclick (format
@@ -45,14 +46,8 @@
          :hx-vals (u/to-json-str {:command    :delete-message
                                   :message-id message-id})
          :name    "delete-message"}
-        [:i.fa-solid.fa-trash]]
-       [:button.btn.btn-dark.btn-sm
-        {:onclick (format
-                   "navigator.clipboard.writeText(atob('%s'))"
-                   (u/base64-encode stack))}
-        [:i.fa-solid.fa-list]]]]
-     [:hr]
-     [:script "hljs.highlightAll();"]]))
+        [:i.fa-solid.fa-trash]]]]
+     [:hr]]))
 
 (def chat-pane
   [:div#chat.overflow-scroll

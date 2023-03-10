@@ -4,11 +4,11 @@
             [hiccup.page :refer [html5]]))
 
 (defn broadcast-tapped-data [clients _db
-                             {:keys [client-id message-id stack message]}]
+                             {:keys [client-id message-id message]}]
   (let [html (html5
               (chat-pages/notifications-pane
                {:hx-swap-oob "afterbegin"}
-               (chat-pages/code-block client-id message-id message stack)))]
+               (chat-pages/code-block client-id message-id message)))]
     (client-api/broadcast! clients (keys clients) html)))
 
 (defn broadcast-delete-data [clients _db message-id]

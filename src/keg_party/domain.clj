@@ -5,8 +5,8 @@
             [next.jdbc.sql :as sql]))
 
 (defn create-tap-message! [{:keys [clients _conn]}
-                           {:keys [client-id message-id stack message] :as m}]
-  {:pre [client-id message-id stack message]}
+                           {:keys [client-id message-id message] :as m}]
+  {:pre [client-id message-id message]}
   (htmx-notifications/broadcast-tapped-data clients nil m))
 
 (defn delete-tap-message! [{:keys [clients _conn]} message-id]
