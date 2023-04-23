@@ -12,7 +12,7 @@
   (log/debug "Running migrations...")
   (jdbc/with-transaction [tx db]
     (doseq [migration migrations]
-      (jdbc/execute! tx migration))))
+      (log/debug (jdbc/execute! tx migration)))))
 
 (defmethod ig/init-key ::teardown [_ m] m)
 
@@ -20,4 +20,4 @@
   (log/debug "Running SQL teardown...")
   (jdbc/with-transaction [tx db]
     (doseq [command commands]
-      (jdbc/execute! tx command))))
+      (log/debug (jdbc/execute! tx command)))))

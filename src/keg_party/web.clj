@@ -1,8 +1,9 @@
 (ns keg-party.web
   (:require [keg-party.commands :as commands]
-            [keg-party.pages :as chat-pages]
+            [keg-party.pages :as pages]
             [keg-party.utils :as u]
             [clojure.tools.logging :as log]
+            [hiccup.core :refer [html]]
             [reitit.ring :as ring]
             [reitit.ring.coercion :as coercion]
             [reitit.ring.middleware.muuntaja :as muuntaja]
@@ -35,9 +36,9 @@
   ([request resp _raise]
    (resp (ws-handler request))))
 
-(defn chatroom-page-handler [request]
+(defn landing-page-handler [request]
   (log/info "Returning landing page")
-  (ok (chat-pages/landing-page request)))
+  (ok (pages/landing-page-html request)))
 
 (defn post-message-handler [{:keys [body] :as request}]
   (log/info "Posting message")
@@ -49,9 +50,17 @@
     (commands/dispatch-command request m)
     (ok message-id)))
 
+(defn show-expand-collapse-handler [{:keys [params]}]
+  (let [{:keys [show-collapse target-id]} params]
+    (ok (html
+         (pages/expand-collapse-block
+          (parse-boolean show-collapse)
+          target-id)))))
+
 (def routes
-  [["/" {:get  chatroom-page-handler
+  [["/" {:get  landing-page-handler
          :post post-message-handler}]
+   ["/collapse" {:post show-expand-collapse-handler}]
    ["/ws/:client-id" {:handler    ws-handler
                       :parameters {:path {:client-id string?}}}]
    ["/public/*" (ring/create-file-handler {:root "resources"})]])
@@ -65,11 +74,11 @@
                               (update :security dissoc :anti-forgery)
                               (update :security dissoc :content-type-options)
                               (update :responses dissoc :content-types))]
-                         ;wrap-params
+                           ;wrap-params
                          wrap-json-response
                          parameters/parameters-middleware
                          muuntaja/format-request-middleware
                          coercion/coerce-response-middleware
                          coercion/coerce-request-middleware]}})
-   ;(ring/create-file-handler {:path "/resources/"})
+    ;(ring/create-file-handler {:path "/resources/"})
    (constantly (not-found "Not found"))))

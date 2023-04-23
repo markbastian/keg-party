@@ -1,5 +1,5 @@
 (ns keg-party.commands
-  (:require [keg-party.domain :as domain]
+  (:require [keg-party.events :as events]
             [clojure.pprint :as pp]
             [clojure.tools.logging :as log]))
 
@@ -13,9 +13,9 @@
   [context {:keys [command client-id message-id message] :as m}]
   {:pre [client-id message-id message]}
   (log/infof "Dispatching command: %s" command)
-  (domain/create-tap-message! (update context :clients deref) m))
+  (events/create-tap-message! (update context :clients deref) m))
 
 (defmethod dispatch-command :delete-message
   [context {:keys [command message-id]}]
   (log/infof "Dispatching command: %s" command)
-  (domain/delete-tap-message! (update context :clients deref) message-id))
+  (events/delete-tap-message! (update context :clients deref) message-id))
