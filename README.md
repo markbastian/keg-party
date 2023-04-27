@@ -23,7 +23,7 @@ Then invite all your friends to the party by doing the following:
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         com.markbastian/keg-party
         {:git/url "https://github.com/markbastian/keg-party"
-         :sha     "87c804465d7cbaaefd46aee23f996906ee534503"}}
+         :sha     "2b9af40112378f371dece94f063fa2cb7566ca2e"}}
 ```
 
 - Connect the tap target. Note that your env vars need to be configured correctly if you aren't using the defaults.
