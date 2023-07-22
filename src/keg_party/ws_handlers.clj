@@ -12,12 +12,10 @@
 
 (defn on-text [{:keys [path-params] :as context} _ws text-message]
   (let [{:keys [client-id]} path-params
-        {:keys [HEADERS] :as json} (u/read-json text-message)
+        json (u/read-json text-message)
         command (-> json
-                    (assoc
-                     :client-id client-id
-                     :command (some-> HEADERS :HX-Trigger-Name keyword))
-                    (dissoc :HEADERS))]
+                    (update :command keyword)
+                    (assoc :client-id client-id))]
     (log/debugf "client-id: %s command: %s" client-id command)
     (commands/dispatch-command context command)))
 

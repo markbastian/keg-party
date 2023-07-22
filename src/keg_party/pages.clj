@@ -36,8 +36,7 @@
         [:button.btn.btn-dark.btn-sm
          {:ws-send "true"
           :hx-vals (u/to-json-str {:command    :delete-message
-                                   :message-id message-id})
-          :name    "delete-message"}
+                                   :message-id message-id})}
          [:i.fa-solid.fa-trash]]]]]
      [:div.row.align-items-center
       [:div.col [:hr]]
@@ -59,11 +58,7 @@
      {:hx-ext     "ws"
       :ws-connect (format "/ws/%s" (or client-id (random-uuid)))}
      (navbar)
-     (notifications-pane)
-     [:form
-      {:ws-send "true"
-       :name    "chat-message"
-       :method  :post}]]))
+     (notifications-pane)]))
 
 (defn wrap-as-page [content]
   (html5
