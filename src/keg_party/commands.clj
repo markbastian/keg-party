@@ -13,9 +13,9 @@
   [context {:keys [command client-id message-id message] :as m}]
   {:pre [client-id message-id message]}
   (log/infof "Dispatching command: %s" command)
-  (events/create-tap-message! (update context :clients deref) m))
+  (events/create-tap-message! context m))
 
 (defmethod dispatch-command :delete-message
   [context {:keys [command message-id]}]
   (log/infof "Dispatching command: %s" command)
-  (events/delete-tap-message! (update context :clients deref) message-id))
+  (events/delete-tap-message! context message-id))

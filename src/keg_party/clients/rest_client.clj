@@ -30,6 +30,9 @@
   (remove-tap post-tap-data))
 
 (comment
+  (tap-in!)
+  (tap> "TEST")
+
   (some?
    (post-tap-data
     (env :user)

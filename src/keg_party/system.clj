@@ -1,5 +1,6 @@
 (ns keg-party.system
-  (:require [keg-party.web :as web]
+  (:require [keg-party.client-api :as client-api]
+            [keg-party.web :as web]
             [keg-party.ws-handlers :as ws-handlers]
             [environ.core :refer [env]]
             [integrant.core :as ig]
@@ -13,12 +14,12 @@
                                 :on-text    #'ws-handlers/on-text
                                 :on-close   #'ws-handlers/on-close
                                 :on-error   #'ws-handlers/on-error}
-   ::jetty9/server             {:host        "0.0.0.0"
-                                :port        (parse-long (env :keg-party-port "3333"))
-                                :join?       false
-                                :clients     (ig/ref [::clients-state ::ps/atom])
-                                :ws-handlers (ig/ref ::ws/ws-handlers)
-                                :handler     #'web/handler}})
+   ::jetty9/server             {:host           "0.0.0.0"
+                                :port           (parse-long (env :keg-party-port "3333"))
+                                :join?          false
+                                :client-manager (client-api/atomic-client-manager)
+                                :ws-handlers    (ig/ref ::ws/ws-handlers)
+                                :handler        #'web/handler}})
 
 (defonce ^:dynamic *system* nil)
 
@@ -41,6 +42,9 @@
   (stop!)
   (restart!)
   (system)
+
+  (require '[keg-party.clients.rest-client])
+  (keg-party.clients.rest-client/tap-in!)
 
   ;; A code form
   (tap>

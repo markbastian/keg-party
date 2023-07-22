@@ -3,25 +3,39 @@
             [clojure.tools.logging :as log]
             [ring.adapter.jetty9 :as jetty]))
 
-(defn keepalive [state {:keys [client-id]}]
+(defprotocol IClientManager
+  (add-client! [this client])
+  (remove-client! [this client-id])
+  (clients [this])
+  (client [this client-id]))
+
+(defn keepalive [client-manager {:keys [client-id]}]
   (async/go-loop []
     (async/<! (async/timeout (* 2 60 1000)))
-    (when-let [{:keys [ws]} (@state client-id)]
+    (when-let [{:keys [ws]} (client client-manager client-id)]
       (jetty/ping! ws client-id)
       (recur))))
 
-(defn add-client! [state {:keys [client-id] :as m}]
-  (if-not (@state client-id)
-    (do
-      (log/debugf "Adding client: %s" client-id)
-      (swap! state assoc client-id m)
-      (keepalive state m))
-    (log/debugf "Client '%s' already exists. Not adding." client-id)))
+(defrecord AtomicClientManager [state])
 
-(defn remove-client! [state client-id]
-  (when-some [{:keys [client-id]} (@state client-id)]
-    (log/debugf "Removing client: %s" client-id)
-    (swap! state dissoc client-id)))
+(extend-type AtomicClientManager
+  IClientManager
+  (add-client! [{:keys [state] :as this} {:keys [client-id] :as m}]
+    (if-not (client this client-id)
+      (do
+        (log/debugf "Adding client: %s" client-id)
+        (swap! state assoc client-id m)
+        (keepalive this m))
+      (log/debugf "Client '%s' already exists. Not adding." client-id)))
+  (remove-client! [{:keys [state] :as this} client-id]
+    (when-some [{:keys [client-id]} (client this client-id)]
+      (log/debugf "Removing client: %s" client-id)
+      (swap! state dissoc client-id)))
+  (clients [{:keys [state]}] @state)
+  (client [{:keys [state]} client-id] (@state client-id)))
+
+(defn atomic-client-manager []
+  (map->AtomicClientManager {:state (atom {})}))
 
 (defmulti send! (fn [{:keys [transport] :as _user} _message] transport))
 
