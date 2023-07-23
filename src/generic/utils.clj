@@ -1,4 +1,4 @@
-(ns keg-party.utils
+(ns generic.utils
   (:require
    [clojure.pprint :as pp]
    [clojure.string :as str]

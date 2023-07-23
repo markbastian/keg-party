@@ -1,8 +1,8 @@
 (ns keg-party.system
-  (:require [keg-party.client-api :as client-api]
-            [keg-party.web :as web]
-            [keg-party.ws-handlers :as ws-handlers]
+  (:require [keg-party.web :as web]
             [environ.core :refer [env]]
+            [generic.client-api :as client-api]
+            [generic.ws-handlers :as ws-handlers]
             [integrant.core :as ig]
             [parts.ring.adapter.jetty9.core :as jetty9]
             [parts.state :as ps]

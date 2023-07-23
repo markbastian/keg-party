@@ -1,6 +1,6 @@
 (ns keg-party.pages
   "Functions to creat server rendered pages."
-  (:require [keg-party.utils :as u]
+  (:require [generic.utils :as u]
             [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn expand-collapse-block [show-collapse target-id]

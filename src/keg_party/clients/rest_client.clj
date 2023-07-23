@@ -1,7 +1,7 @@
 (ns keg-party.clients.rest-client
-  (:require [keg-party.utils :as u]
-            [clojure.pprint :as pp]
+  (:require [clojure.pprint :as pp]
             [environ.core :refer [env]]
+            [generic.utils :as u]
             [hato.client :as hc]
             [nano-id.core :refer [nano-id]]))
 

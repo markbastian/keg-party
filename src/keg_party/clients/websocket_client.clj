@@ -1,6 +1,6 @@
 (ns keg-party.clients.websocket-client
-  (:require [keg-party.utils :as u]
-            [environ.core :refer [env]]
+  (:require [environ.core :refer [env]]
+            [generic.utils :as u]
             [hato.websocket :as ws]
             [nano-id.core :refer [nano-id]])
   (:import java.util.Date))
@@ -13,9 +13,9 @@
                            :on-close   (fn [ws status reason]
                                          (println "WebSocket closed!"))})]
     (ws/send! ws (u/to-json-str
-                  {:HEADERS      {:HX-Trigger-Name "tap-message"}
-                   :client-id (env :user)
+                  {:command    "tap-message"
+                   :client-id  (env :user)
                    :message-id (nano-id 10)
-                   :message (str "TIME: " (Date.))}))
+                   :message    (str "TIME: " (Date.))}))
     (Thread/sleep 1000)
     (ws/close! ws)))
