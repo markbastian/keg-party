@@ -8,7 +8,7 @@
   (let [{:keys [client-id]} path-params]
     (client-api/add-client!
      client-manager
-     (client-api/ws-client {:client-id client-id :ws ws}))))
+     (client-api/ws-client {:client-id client-id :accept :htmx :ws ws}))))
 
 (defn on-text [{:keys [path-params] :as context} _ws text-message]
   (let [{:keys [client-id]} path-params
