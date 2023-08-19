@@ -81,6 +81,7 @@ Build a deployable jar of this library (Still needs work):
 - [ ] Add args for deps so we can easily launch with -X args
 - [ ] Add client profile so you can just add the profile and connect the tap at launch
 - [ ] Documentation with screenshots
+- [ ] User spaces
 
 ## License
 

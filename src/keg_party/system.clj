@@ -5,12 +5,10 @@
             [generic.ws-handlers :as ws-handlers]
             [integrant.core :as ig]
             [parts.ring.adapter.jetty9.core :as jetty9]
-            [parts.state :as ps]
             [parts.ws-handler :as ws]))
 
 (def config
-  {[::clients-state ::ps/atom] {}
-   ::ws/ws-handlers            {:on-connect #'ws-handlers/on-connect
+  {::ws/ws-handlers            {:on-connect #'ws-handlers/on-connect
                                 :on-text    #'ws-handlers/on-text
                                 :on-close   #'ws-handlers/on-close
                                 :on-error   #'ws-handlers/on-error}
