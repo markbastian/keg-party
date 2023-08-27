@@ -11,13 +11,29 @@ Start your party by launching a server with one of the following options:
 - `clj -X keg-party.main/run` from the cloned project
 - Build an uberjar with `clojure -X:uberjar` then run it with `java -jar keg-party.jar`
 
-By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the configuration section below.
+By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the
+configuration section below.
+
+When you connect to the server, you'll be directed to a login page:
+
+![login.png](docs/login.png)
+
+If you haven't created an account, follow the "Sign up" link to do so:
+
+![signup.png](docs/signup.png)
+
+Whether you are logging in to an existing account or creating a new one, you'll be immediately directed to the tap feed once you are signed in:
+
+![feed.png](docs/feed.png)
+
+Start playing around and have some fun!
 
 ### Connect your client
 
-Then invite all your friends to the party by doing the following:
+Invite all your friends to the party by doing the following:
 
-- Add `keg-party` as a dependency to your project. The suggested way is to add it to your `~/.clojure/deps.edn` file like so:
+Add `keg-party` as a dependency to your project. The suggested way is to add it to your `~/.clojure/deps.edn` file
+  like so:
 
 ```clojure
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
@@ -26,13 +42,24 @@ Then invite all your friends to the party by doing the following:
          :sha     "2b9af40112378f371dece94f063fa2cb7566ca2e"}}
 ```
 
-- Connect the tap target. Note that your env vars need to be configured correctly if you aren't using the defaults.
-  - The manual way is to invoke the following commands in sequence:
-    - `(require '[keg-party.clients.rest-client :as kprc])`
-    - `(kprc/tap-in!)` or `(kprc/tap-in! "username")`
-  - For an automated experience, do the following:
-    - Create a local dev or user profile (e.g. add `:dev {:extra-paths ["dev"]}` to your `~/.clojure/deps.edn` `:alias`es)
-    - In that profile's extra paths, add a ns that looks something like this:
+Configure your environment with the following environment variables:
+- `KEG_PARTY_HOST`, defaults to http://localhost
+- `KEG_PARTY_PORT`, defaults to 3333
+- `KEG_PARTY_USERNAME`, defaults to `(or (env :keg-party-user-id) (env :user))`
+- `KEG_PARTY_PASSWORD`, no default. This is your password from the setup page.
+  - This is the only env var that you _must_ set if you aren't using the defaults.
+
+Connect the tap target by invoking:
+```clojure
+(do
+  (require '[keg-party.clients.rest-client :as kprc])
+  (kprc/tap-in!))
+```
+
+For an automated experience, do the following:
+- Create a local dev or user profile if you don't already have one
+  - (e.g. add `:dev {:extra-paths ["dev"]}` to your `~/.clojure/deps.edn` `:aliases`)
+- In that profile's extra paths, add a ns that looks something like this:
 
 ```clojure
 (ns user
@@ -42,29 +69,18 @@ Then invite all your friends to the party by doing the following:
 (kprc/tap-in!)
 ```
 
+If you already have such a namespace, just add the above to it.
+
 Ensure that this profile is active when you launch your REPL. When you do so, this code will be run and you are good to go.
 
-- Test it out with by doing something like this:
+Test your config you by doing something like this:
 
 ```clojure
 (tap> {:best-drink-ever     :diet-dew
        :the-next-best-thing :diet-dr-pepper})
 ```
 
-- Head on over to your party server and see the data!
-
-## Configuration
-
-The following environment variables may be set:
-
-- `KEG_PARTY_HOST`, defaults to http://localhost
-- `KEG_PARTY_PORT`, defaults to 3333
-
-Protip: Launch using Clojure deps prefixed with env vars like so:
-
-```clojure
-KEG_PARTY_PORT=3333 KEG_PARTY_INCLUDES_REGEX=my-project-ns.* clj -X keg-party.main/run
-```
+Head on over to your party server and see the data!
 
 ## Misc
 
@@ -77,11 +93,16 @@ Build a deployable jar of this library (Still needs work):
     $ clojure -X:jar
 
 ## TODOs
-- [ ] Persistence
+
+- [X] Persistence
+- [ ] Create protocols for db ops to hide implementation (e.g. users and taps)
+- [ ] Add admin profile concept so that only admins can see client tabs, for example
+- [ ] Expose favorites
+- [ ] Drill-down/explore individual tap data
 - [ ] Add args for deps so we can easily launch with -X args
 - [ ] Add client profile so you can just add the profile and connect the tap at launch
 - [ ] Documentation with screenshots
-- [ ] User spaces
+- [ ] User spaces/channels
 
 ## License
 

@@ -86,7 +86,7 @@
    (navbar request)
    (notifications-pane
     (let [recent-taps (migrations/get-recent-taps ds username 3)
-          tap-count  (dec (count recent-taps))]
+          tap-count   (dec (count recent-taps))]
       (map-indexed
        (fn [idx {:tap/keys [tap id]}]
          (code-block username id tap (= idx tap-count)))
@@ -100,8 +100,7 @@
    [:form.container.border.rounded
     {:action "/login" :method :post}
     [:div.form-group.mb-2
-     [:h4.text-center "Login"                               ;"Welcome to the party!"
-      ]
+     [:h4.text-center "Welcome to the party!"]
      [:label "Username"]
      [:input.form-control
       {:name         "username"
@@ -127,8 +126,7 @@
    [:form.container.border.rounded
     {:action "/signup" :method :post}
     [:div.form-group.mb-2
-     [:h4.text-center "Sign up"                             ;"Welcome to the party!"
-      ]
+     [:h4.text-center "Join the party!"]
      [:label "Username"]
      [:input.form-control
       {:name         "username"
@@ -152,17 +150,19 @@
       "Sign up"]]]])
 
 (defn clients-page [{{:keys [session-id] :as session} :session :keys [client-manager]}]
-  (into
-   [:table.table.table-striped.table-dark.table-bordered.table-sm
-    [:tr
-     [:th "Username"]
-     [:th "Session ID"]
-     [:th "Protocol"]]]
-   (for [{:keys [client-id username ws]} (client-api/clients client-manager)]
+  [:div
+   (into
+    [:table.table.table-striped.table-dark.table-bordered.table-sm
      [:tr
-      [:td (cond-> username (= (:username session) username) (str " *"))]
-      [:td (cond-> client-id (= session-id client-id) (str " *"))]
-      [:td (if (some? ws) "ws" "?")]])))
+      [:th "Username"]
+      [:th "Session ID"]
+      [:th "Protocol"]]]
+    (for [{:keys [client-id username ws]} (client-api/clients client-manager)]
+      [:tr
+       [:td (cond-> username (= (:username session) username) (str " *"))]
+       [:td (cond-> client-id (= session-id client-id) (str " *"))]
+       [:td (if (some? ws) "ws" "?")]]))
+   [:p [:a {:href "/feed"} "Feed"]]])
 
 (defn wrap-as-page [content]
   (html5
