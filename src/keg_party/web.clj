@@ -49,9 +49,6 @@
          :post post-message-handler}]
    ["/collapse" {:post show-expand-collapse-handler}]
    ["/clients" {:get (fn [{:keys [session] :as request}]
-                       (println "XXXXXXXXXXXX")
-                       (pp/pprint session)
-                       (println "XXXXXXXXXXXX")
                        (if (:username session)
                          (ok (pages/wrap-as-page
                               (pages/clients-page request)))
@@ -61,11 +58,23 @@
                       (ok (pages/wrap-as-page
                            (pages/feed-page request)))
                       (found "/login")))}]
+   ["/tap_page" {:get (fn [{{:keys [username]}     :session
+                            {:keys [limit cursor]} :params
+                            :keys [ds]}]
+                        (if username
+                          (ok
+                           (html
+                            (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
+                                  tap-count  (dec (count recent-taps))]
+                              (map-indexed
+                               (fn [idx {:tap/keys [tap id]}]
+                                 (pages/code-block username id tap (= idx tap-count)))
+                               recent-taps))))
+                          (found "/login")))}]
    ["/login" {:get  (fn [request]
                       (ok (pages/wrap-as-page
                            (pages/login-page request))))
-              :post (fn [{{:keys [username password]} :params :keys [ds session]}]
-                      (pp/pprint [:login session])
+              :post (fn [{{:keys [username password]} :params :keys [ds]}]
                       (if-some [user (migrations/user ds {:username username})]
                         (if (auth/check-password (:user/password user) password)
                           (-> (found "/feed")

@@ -18,34 +18,42 @@
                                     :target-id     target-id})
     :hx-swap        "outerHTML"}])
 
-(defn code-block [username message-id message]
-  (let [id (format "code-block-%s" message-id)]
-    [:div
-     {:id id}
-     [:div.collapse.show
-      {:id (format "%s-collapse" id)}
-      [:p username]
-      [:div.d-flex.justify-content-between.align-items-top
-       [:div.overflow-auto
-        [:pre
-         [:code.language-clojure message]]
-        [:script "hljs.highlightAll();"]]
-       [:div.d-flex.flex-column.gap-1
-        [:button.btn.btn-dark.btn-sm
-         {:onclick (format
-                    "navigator.clipboard.writeText(atob('%s'))"
-                    (u/base64-encode message))}
-         [:i.fa-solid.fa-copy]]
-        [:button.btn.btn-dark.btn-sm
-         {:ws-send "true"
-          :hx-vals (u/to-json-str {:command    :delete-message
-                                   :message-id message-id})}
-         [:i.fa-solid.fa-trash]]]]]
-     [:div.row.align-items-center
-      [:div.col [:hr]]
-      [:div.col-auto
-       (expand-collapse-block true (format "#%s-collapse" id))]
-      [:div.col [:hr]]]]))
+(defn code-block
+  ([username message-id message]
+   (code-block username message-id message false))
+  ([username message-id message last?]
+   (let [id (format "code-block-%s" message-id)]
+     [:div
+      (cond->
+       {:id id}
+        last?
+        (merge {:hx-get     (format "/tap_page?limit=3&cursor=%s" message-id)
+                :hx-trigger "revealed"
+                :hx-swap    "afterend"}))
+      [:div.collapse.show
+       {:id (format "%s-collapse" id)}
+       [:p username]
+       [:div.d-flex.justify-content-between.align-items-top
+        [:div.overflow-auto
+         [:pre
+          [:code.language-clojure message]]
+         [:script "hljs.highlightAll();"]]
+        [:div.d-flex.flex-column.gap-1
+         [:button.btn.btn-dark.btn-sm
+          {:onclick (format
+                     "navigator.clipboard.writeText(atob('%s'))"
+                     (u/base64-encode message))}
+          [:i.fa-solid.fa-copy]]
+         [:button.btn.btn-dark.btn-sm
+          {:ws-send "true"
+           :hx-vals (u/to-json-str {:command    :delete-message
+                                    :message-id message-id})}
+          [:i.fa-solid.fa-trash]]]]]
+      [:div.row.align-items-center
+       [:div.col [:hr]]
+       [:div.col-auto
+        (expand-collapse-block true (format "#%s-collapse" id))]
+       [:div.col [:hr]]]])))
 
 (defn notifications-pane [& r]
   (into [:div#tap-log.p-2] r))
@@ -77,10 +85,12 @@
     :ws-connect (format "/ws")}
    (navbar request)
    (notifications-pane
-    (map
-     (fn [{:tap/keys [tap id]}]
-       (code-block username id tap))
-     (migrations/get-recent-taps ds username)))])
+    (let [recent-taps (migrations/get-recent-taps ds username 3)
+          tap-count  (dec (count recent-taps))]
+      (map-indexed
+       (fn [idx {:tap/keys [tap id]}]
+         (code-block username id tap (= idx tap-count)))
+       recent-taps)))])
 
 (defn login-page [& attributes]
   [:div (into

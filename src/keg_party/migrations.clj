@@ -81,46 +81,38 @@
       :left-join [[:user :U] [:= :U.id :T.user_id]]
       :where     [:= :U.username user]
       :order-by  [[:created_at :desc]]
+      :limit     limit})))
+  ([ds user limit cursor]
+   (jdbc/execute!
+    ds
+    (hsql/format
+     {:select    [:*]
+      :from      [[:tap :T]]
+      :left-join [[:user :U] [:= :U.id :T.user_id]]
+      :where     [:and
+                  [:= :U.username user]
+                  [:> cursor :T.id]]
+      :order-by  [[:created_at :desc]]
       :limit     limit}))))
 
 (comment
   (require '[keg-party.system :as system])
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (create-user! ds {:username "mbastian" :email "markbastian@gmail.com"}))
+  (def ds (:parts.next.jdbc.core/datasource (system/system)))
 
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (create-user! ds {:username "foo" :email "markbastian@gmail.com"}))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-users ds))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (user ds {:id 2}))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-user ds 2))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-user ds 0))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-user-by-username ds "bob"))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-user-by-email ds "markbastian@gmail.com"))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (sql/get-by-id ds :user 2))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (create-tap! ds {:user-id 3
-                     :tap     '(reduce + (range 10))}))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-taps ds))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (read-tap ds 1))
-
-  (let [ds (:parts.next.jdbc.core/datasource (system/system))]
-    (delete-tap! ds 36)))
+  (create-user! ds {:username "mbastian" :email "markbastian@gmail.com"})
+  (create-user! ds {:username "foo" :email "markbastian@gmail.com"})
+  (read-users ds)
+  (user ds {:id 2})
+  (read-user ds 2)
+  (read-user ds 0)
+  (read-user-by-username ds "bob")
+  (read-user-by-email ds "markbastian@gmail.com")
+  (sql/get-by-id ds :user 2)
+  (create-tap! ds {:user-id 3
+                   :tap     '(reduce + (range 10))})
+  (read-taps ds)
+  (read-tap ds 1)
+  (delete-tap! ds 36)
+  (count (get-recent-taps ds "mbastian"))
+  (map :tap/id (get-recent-taps ds "mbastian"))
+  (map :tap/id (get-recent-taps ds "mbastian" 10 16)))
