@@ -4,7 +4,7 @@
    [keg-party.commands]
    [keg-party.migrations :as migrations]
    [keg-party.pages :as pages]
-   [clojure.pprint :as pp]
+   [clojure.string :as str]
    [clojure.tools.logging :as log]
    [generic.commands :as cmd]
    [generic.utils :as u]
@@ -19,20 +19,21 @@
    [ring.middleware.session.cookie :refer [cookie-store]]
    [ring.util.http-response :refer [forbidden found not-found ok unauthorized]]))
 
-(defn landing-page-handler [request]
-  (log/info "Returning landing page")
-  (ok (pages/landing-page-html request)))
-
-(defn post-message-handler [{:keys [body] :as request}]
+(defn post-message-handler [{{:strs [authorization]} :headers :keys [ds body] :as request}]
   (log/info "Posting message")
-  (cmd/dispatch-command
-   request
-   (-> (u/read-json body)
-       (select-keys [:username :message])
-       (update :message u/base64-decode)
-       (assoc :command :tap-message)
-       (doto pp/pprint)))
-  (ok "ACK"))
+  (let [[_ tok] (str/split authorization #" ")
+        [username password] (str/split (u/base64-decode tok) #":")]
+    (if-some [user (migrations/user ds {:username username})]
+      (if (auth/check-password (:user/password user) password)
+        (do
+          (cmd/dispatch-command
+           request
+           {:message  (u/base64-decode (slurp body))
+            :username username
+            :command  :tap-message})
+          (ok "ACK"))
+        (forbidden "Pound sand"))
+      (unauthorized "Pound sand"))))
 
 (defn show-expand-collapse-handler [{:keys [params]}]
   (let [{:keys [show-collapse target-id]} params]
@@ -60,12 +61,12 @@
                       (found "/login")))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
-                            :keys [ds]}]
+                            :keys                  [ds]}]
                         (if username
                           (ok
                            (html
                             (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
-                                  tap-count  (dec (count recent-taps))]
+                                  tap-count   (dec (count recent-taps))]
                               (map-indexed
                                (fn [idx {:tap/keys [tap id]}]
                                  (pages/code-block username id tap (= idx tap-count)))
@@ -116,7 +117,9 @@
                               (update :security dissoc :content-type-options)
                               (update :responses dissoc :content-types)
                               (assoc-in [:session :store] (cookie-store))
-                              (assoc-in [:session :cookie-name] "keg-party-sessions"))]
+                              (assoc-in [:session :cookie-name] "keg-party-sessions")
+                                ;; Set the session to last for a year. It will end when browser is closed.
+                              (assoc-in [:session :cookie-attrs] {:max-age (* 60 24 365)}))]
                          wrap-json-response
                          parameters/parameters-middleware
                          muuntaja/format-request-middleware
