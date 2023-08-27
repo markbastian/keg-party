@@ -12,11 +12,12 @@
   (jetty/send! ws bytebuffer))
 
 (defn on-pong [_context _ws ^ByteBuffer bytebuffer]
+  (log/info "Received pong")
   (let [message (loop [res []]
                   (if (.hasRemaining bytebuffer)
                     (recur (conj res (.get bytebuffer)))
                     (String. (byte-array res))))]
-    (log/tracef "Received pong: %s" message)))
+    (log/infof "Received pong: %s" message)))
 
 (defmethod ig/init-key ::ws-handlers [_ config]
   (log/debug "Configuring websocket handlers.")

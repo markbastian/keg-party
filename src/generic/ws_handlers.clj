@@ -4,30 +4,31 @@
             [generic.utils :as u]
             [clojure.tools.logging :as log]))
 
-(defn on-connect [{:keys [path-params client-manager]} ws]
-  (let [{:keys [client-id]} path-params]
-    (client-api/add-client!
-     client-manager
-     (client-api/ws-client {:client-id client-id :accept :htmx :ws ws}))))
+(defn on-connect [{{:keys [username session-id]} :session :keys [client-manager]} ws]
+  (client-api/add-client!
+   client-manager
+   (client-api/ws-client {:client-id session-id
+                          :username  username
+                          :accept    :htmx
+                          :ws        ws})))
 
-(defn on-text [{:keys [path-params] :as context} _ws text-message]
-  (let [{:keys [client-id]} path-params
-        json    (u/read-json text-message)
+(defn on-text [{{:keys [_username session-id]} :session :as context} _ws text-message]
+  (let [json    (u/read-json text-message)
         command (-> json
                     (update :command keyword)
-                    (assoc :client-id client-id))]
-    (log/debugf "client-id: %s command: %s" client-id command)
+                    (assoc :client-id session-id))]
+    (log/debugf "client-id: %s command: %s" session-id command)
     (cmd/dispatch-command context command)))
 
-(defn on-close [{:keys [path-params client-manager]} _ws _status-code _reason]
-  (let [{:keys [client-id]} path-params]
-    (log/debugf "on-close triggered for client: %s" client-id)
-    (client-api/remove-client! client-manager client-id)))
+(defn on-close [{{:keys [_username session-id]} :session
+                 :keys                          [client-manager]} _ws _status-code _reason]
+  (log/debugf "on-close triggered for client: %s" session-id)
+  (client-api/remove-client! client-manager session-id))
 
-(defn on-error [{:keys [path-params client-manager]} ws err]
-  (let [{:keys [client-id]} path-params]
-    (log/debugf "on-error triggered for client: %s" client-id)
-    (client-api/remove-client! client-manager client-id)
-    (println ws)
-    (println err)
-    (println "ERROR")))
+(defn on-error [{{:keys [_username session-id]} :session
+                 :keys                          [client-manager]} ws err]
+  (log/debugf "on-error triggered for client: %s" session-id)
+  (client-api/remove-client! client-manager session-id)
+  (println ws)
+  (println err)
+  (println "ERROR"))

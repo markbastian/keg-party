@@ -3,30 +3,16 @@
             [generic.client-api :as client-api]
             [hiccup.page :refer [html5]]))
 
-(defmulti transform (fn [{:keys [accept]} {:keys [event]}] [accept event]))
-
-(defmethod transform [:htmx :data-tapped] [_ {:keys [_ client-id message-id message]}]
-  (html5
-   (pages/notifications-pane
-    {:hx-swap-oob "afterbegin"}
-    (pages/code-block client-id message-id message))))
-
-(defmethod transform [:htmx :data-deleted] [_ {:keys [message-id]}]
-  (html5
-   [:div {:id          (format "code-block-%s" message-id)
-          :style       "opacity: 0; transition: opacity 1s linear;"
-          :hx-swap-oob "delete"}]))
-
-(defn broadcast-tapped-data [clients {:keys [client-id message-id message]}]
+(defn broadcast-tapped-data [clients {:keys [username message-id message]}]
   (let [html (html5
               (pages/notifications-pane
                {:hx-swap-oob "afterbegin"}
-               (pages/code-block client-id message-id message)))]
-    (client-api/broadcast! clients (keys clients) html)))
+               (pages/code-block username message-id message)))]
+    (client-api/broadcast! clients html)))
 
 (defn broadcast-delete-data [clients message-id]
   (let [html (html5
               [:div {:id          (format "code-block-%s" message-id)
                      :style       "opacity: 0; transition: opacity 1s linear;"
                      :hx-swap-oob "delete"}])]
-    (client-api/broadcast! clients (keys clients) html)))
+    (client-api/broadcast! clients html)))

@@ -1,7 +1,7 @@
 (ns generic.web
   (:require [clojure.tools.logging :as log]
             [ring.adapter.jetty9 :as jetty]
-            [ring.util.http-response :refer [internal-server-error]]))
+            [ring.util.http-response :refer [found internal-server-error]]))
 
 (defn ws-upgrade-handler [{:keys [ws-handlers] :as context} upgrade-request]
   (let [{:keys [on-connect on-text on-bytes on-close on-ping on-pong on-error]} ws-handlers
@@ -18,14 +18,18 @@
      :extensions  provided-extensions}))
 
 (defn ws-handler
-  ([request]
-   (log/info "Upgrading request to web socket")
-   (if (jetty/ws-upgrade-request? request)
-     (jetty/ws-upgrade-response (partial ws-upgrade-handler request))
-     (internal-server-error "Cannot upgrade request")))
+  ([{{:keys [username session-id]} :session :as request}]
+   (if (and username session-id)
+     (do
+       (log/info "Upgrading request to web socket")
+       (if (jetty/ws-upgrade-request? request)
+         (jetty/ws-upgrade-response (partial ws-upgrade-handler request))
+         (internal-server-error "Cannot upgrade request")))
+     (do
+       (log/info "No session information available")
+       (found "/login"))))
   ([request resp _raise]
    (resp (ws-handler request))))
 
 (def route
-  ["/ws/:client-id" {:handler    ws-handler
-                     :parameters {:path {:client-id string?}}}])
+  ["/ws" {:handler ws-handler}])

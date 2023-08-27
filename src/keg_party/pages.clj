@@ -1,6 +1,9 @@
 (ns keg-party.pages
   "Functions to creat server rendered pages."
-  (:require [generic.utils :as u]
+  (:require [keg-party.migrations :as migrations]
+            [clojure.pprint :as pp]
+            [generic.client-api :as client-api]
+            [generic.utils :as u]
             [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn expand-collapse-block [show-collapse target-id]
@@ -15,13 +18,13 @@
                                     :target-id     target-id})
     :hx-swap        "outerHTML"}])
 
-(defn code-block [client-id message-id message]
+(defn code-block [username message-id message]
   (let [id (format "code-block-%s" message-id)]
     [:div
      {:id id}
      [:div.collapse.show
       {:id (format "%s-collapse" id)}
-      [:p client-id]
+      [:p username]
       [:div.d-flex.justify-content-between.align-items-top
        [:div.overflow-auto
         [:pre
@@ -47,18 +50,109 @@
 (defn notifications-pane [& r]
   (into [:div#tap-log.p-2] r))
 
-(defn navbar []
+(defn navbar [{:keys [session]}]
+  (pp/pprint {:navbar session})
   [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top
-   [:a.navbar-brand.mx-auto {:href "#"}
-    [:img {:src "public/keg_party/rootbeer-sm.png" :width "30" :height "30" :alt ""}]]])
+   [:a.navbar-brand {:href "#"}
+    [:img {:src   "public/keg_party/rootbeer-sm.png"
+           :width "30" :height "30" :alt ""}]]
+   [:button.navbar-toggler {:type           "button"
+                            :data-bs-toggle "collapse"
+                            :data-bs-target "#navbarText"}
+    [:span.navbar-toggler-icon]]
+   [:div#navbarText.collapse.navbar-collapse
+    [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
+     [:li.nav-item
+      [:a.nav-link.active {:href "/clients"} "Clients"]]
+     [:li.nav-item
+      [:a.nav-link {:href "#"} "Features"]]
+     [:li.nav-item
+      [:a.nav-link {:href "/logout"}
+       (format "Logout %s" (:username session))]]]]])
 
-(defn landing-page [{:keys [params] :as _request}]
-  (let [{:keys [client-id]} params]
-    [:div
-     {:hx-ext     "ws"
-      :ws-connect (format "/ws/%s" (or client-id (random-uuid)))}
-     (navbar)
-     (notifications-pane)]))
+(defn feed-page [{{:keys [username]} :session
+                  :keys              [ds] :as request}]
+  [:div
+   {:hx-ext     "ws"
+    :ws-connect (format "/ws")}
+   (navbar request)
+   (notifications-pane
+    (map
+     (fn [{:tap/keys [tap id]}]
+       (code-block username id tap))
+     (migrations/get-recent-taps ds username)))])
+
+(defn login-page [& attributes]
+  [:div (into
+         {:id    "app"
+          :style "position:absolute; top:20%; right:0; left:0;"}
+         attributes)
+   [:form.container.border.rounded
+    {:action "/login" :method :post}
+    [:div.form-group.mb-2
+     [:h4.text-center "Login"                               ;"Welcome to the party!"
+      ]
+     [:label "Username"]
+     [:input.form-control
+      {:name         "username"
+       :placeholder  "Enter username"
+       :autocomplete "off"}]
+     [:label "Password"]
+     [:input.form-control
+      {:name         "password"
+       :type         "password"
+       :placeholder  "Enter your password"
+       :autocomplete "off"}]]
+    [:div.d-grid.gap-2
+     [:button.btn.btn-primary.btn-dark
+      {:type "submit"}
+      "Sign in"]]
+    [:p "Don't have an account?" [:a {:href "/signup"} "Sign up"]]]])
+
+(defn signup-page [& attributes]
+  [:div (into
+         {:id    "app"
+          :style "position:absolute; top:20%; right:0; left:0;"}
+         attributes)
+   [:form.container.border.rounded
+    {:action "/signup" :method :post}
+    [:div.form-group.mb-2
+     [:h4.text-center "Sign up"                             ;"Welcome to the party!"
+      ]
+     [:label "Username"]
+     [:input.form-control
+      {:name         "username"
+       :placeholder  "Enter username"
+       :autocomplete "off"}]
+     [:label "Email address"]
+     [:input.form-control
+      {:name         "email"
+       :type         "email"
+       :placeholder  "Enter email"
+       :autocomplete "off"}]
+     [:label "Password"]
+     [:input.form-control
+      {:name         "password"
+       :type         "password"
+       :placeholder  "Enter a really great password"
+       :autocomplete "off"}]]
+    [:div.d-grid.gap-2
+     [:button.btn.btn-primary.btn-dark
+      {:type "submit"}
+      "Sign up"]]]])
+
+(defn clients-page [{{:keys [session-id] :as session} :session :keys [client-manager]}]
+  (into
+   [:table.table.table-striped.table-dark.table-bordered.table-sm
+    [:tr
+     [:th "Username"]
+     [:th "Session ID"]
+     [:th "Protocol"]]]
+   (for [{:keys [client-id username ws]} (client-api/clients client-manager)]
+     [:tr
+      [:td (cond-> username (= (:username session) username) (str " *"))]
+      [:td (cond-> client-id (= session-id client-id) (str " *"))]
+      [:td (if (some? ws) "ws" "?")]])))
 
 (defn wrap-as-page [content]
   (html5
@@ -78,5 +172,7 @@
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    content))
 
-(defn landing-page-html [request]
-  (wrap-as-page (landing-page request)))
+(defn landing-page-html [_request]
+  (wrap-as-page
+   (signup-page)
+   #_(feed-page request)))

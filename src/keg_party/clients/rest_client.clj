@@ -2,8 +2,7 @@
   (:require [clojure.pprint :as pp]
             [environ.core :refer [env]]
             [generic.utils :as u]
-            [hato.client :as hc]
-            [nano-id.core :refer [nano-id]]))
+            [hato.client :as hc]))
 
 (defn post-tap-data [client-id data]
   (let [host (env :keg-party-host "http://localhost")
@@ -13,17 +12,14 @@
      {:url              url
       :method           :post
       :body             (u/to-json-str
-                         {:client-id  client-id
-                          :message-id (nano-id 10)
-                          ;; TODO gzip on both ends
+                         {:username  client-id
                           :message    (u/base64-encode (with-out-str (pp/pprint data)))})
       :throw-exceptions false})))
 
 (defn tap-in!
   ([] (add-tap (partial post-tap-data (or
                                        (env :keg-party-user-id)
-                                       (env :user)
-                                       "random user"))))
+                                       (env :user)))))
   ([client-id] (add-tap (partial post-tap-data client-id))))
 
 (defn tap-out! []

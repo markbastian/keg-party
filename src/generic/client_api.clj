@@ -6,7 +6,7 @@
 (defprotocol IClientManager
   (add-client! [this client])
   (remove-client! [this client-id])
-  (clients [this])
+  (clients [this] [this username])
   (client [this client-id]))
 
 (defrecord AtomicClientManager [state])
@@ -23,7 +23,12 @@
     (when-some [{:keys [client-id]} (client this client-id)]
       (log/debugf "Removing client: %s" client-id)
       (swap! state dissoc client-id)))
-  (clients [{:keys [state]}] @state)
+  (clients
+    ([{:keys [state]}] (vals @state))
+    ([{:keys [state]} username]
+     (for [client (vals @state)
+           :when (= username (:username client))]
+       client)))
   (client [{:keys [state]} client-id] (@state client-id)))
 
 (defn atomic-client-manager []
@@ -32,15 +37,17 @@
 (defprotocol IClient
   (send! [this message]))
 
-(defrecord WebSocketClient [ws client-id])
+(defrecord WebSocketClient [ws username client-id])
 
 (defn keepalive [{:keys [ws client-id]}]
   {:pre [ws client-id]}
   (let [alive? (atom true)]
     (async/go-loop []
-      (async/<! (async/timeout (* 2 60 1000)))
-      (if @alive?
+      ;; Send a ping every 5 minutes
+      (async/<! (async/timeout (* 5 60 1000)))
+      (when @alive?
         (try
+          (log/infof "Sending ping to client %s" client-id)
           (jetty/ping! ws client-id)
           (catch Exception _
             (swap! alive? (constantly false))
@@ -53,11 +60,11 @@
     (log/infof "Sending to %s via ws." client-id)
     (jetty/send! ws message)))
 
-(defn ws-client [{:keys [ws client-id] :as client-map}]
-  {:pre [ws client-id]}
+(defn ws-client [{:keys [ws username client-id] :as client-map}]
+  {:pre [ws username client-id]}
   (keepalive client-map)
   (map->WebSocketClient client-map))
 
-(defn broadcast! [clients client-ids message]
-  (doseq [client-id client-ids :let [client (clients client-id)] :when client]
+(defn broadcast! [clients message]
+  (doseq [client clients]
     (send! client message)))
