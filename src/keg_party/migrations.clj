@@ -79,11 +79,25 @@
 (defn delete-tap! [ds id]
   (sql/delete! ds :tap {:id id}))
 
-(defn favorite [ds user-id tap-id]
-  (sql/insert! ds :favorites {:user_id user-id :tap_id tap-id}))
+(defn get-favorite [ds {:keys [username user-id tap-id]}]
+  (-> (cond
+        user-id (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})
+        username (let [user-id (read-user-by-username ds username)]
+                   (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})))
+      seq
+      some?))
 
-(defn unfavorite [ds user-id tap-id]
-  (sql/delete! ds :favorites {:user_id user-id :tap_id tap-id}))
+(defn favorite [ds {:keys [username user-id tap-id]}]
+  (cond
+    user-id (sql/insert! ds :favorite {:user_id user-id :tap_id tap-id})
+    username (let [user-id (read-user-by-username ds username)]
+               (sql/insert! ds :favorite {:user_id user-id :tap_id tap-id}))))
+
+(defn unfavorite [ds {:keys [username user-id tap-id]}]
+  (cond
+    user-id (sql/delete! ds :favorite {:user_id user-id :tap_id tap-id})
+    username (let [user-id (read-user-by-username ds username)]
+               (sql/delete! ds :favorite {:user_id user-id :tap_id tap-id}))))
 
 (defn get-recent-taps
   ([ds user]
@@ -115,10 +129,9 @@
   (require '[keg-party.system :as system])
   (def ds (:parts.next.jdbc.core/datasource (system/system)))
 
-  (favorite ds 1 1)
-  (read-tap ds 1)
-  (unfavorite ds 1 1)
-  (read-tap ds 1)
+  (favorite ds {:user-id 1 :tap-id 1})
+  (get-favorite ds {:user-id 1 :tap-id 1})
+  (unfavorite ds {:user-id 1 :tap-id 1})
 
   (create-user! ds {:username "mbastian" :email "markbastian@gmail.com"})
   (create-user! ds {:username "foo" :email "markbastian@gmail.com"})

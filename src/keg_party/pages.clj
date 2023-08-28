@@ -48,7 +48,15 @@
           {:ws-send "true"
            :hx-vals (u/to-json-str {:command    :delete-message
                                     :message-id message-id})}
-          [:i.fa-solid.fa-trash]]]]]
+          [:i.fa-solid.fa-trash]]
+         ;; TODO
+         (if true
+           [:button.btn.btn-dark.btn-sm
+            {:id (format "tap-favorite-%s-%s" username message-id) :style "color:#FFD700;"}
+            [:i.fa-solid.fa-star]]
+           [:button.btn.btn-dark.btn-sm
+            {:id (format "tap-favorite-%s-%s" username message-id)}
+            [:i.fa-solid.fa-star]])]]]
       [:div.row.align-items-center
        [:div.col [:hr]]
        [:div.col-auto
