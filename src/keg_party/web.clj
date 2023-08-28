@@ -54,24 +54,16 @@
                          (ok (pages/wrap-as-page
                               (pages/clients-page request)))
                          (found "/login")))}]
+   ["/favorite" {:post (fn [{:keys [session] :as request}]
+                         (if (:username session)
+                           (ok (pages/wrap-as-page
+                                (pages/feed-page request)))
+                           (found "/login")))}]
    ["/feed" {:get (fn [{:keys [session] :as request}]
                     (if (:username session)
                       (ok (pages/wrap-as-page
                            (pages/feed-page request)))
                       (found "/login")))}]
-   ["/tap_page" {:get (fn [{{:keys [username]}     :session
-                            {:keys [limit cursor]} :params
-                            :keys                  [ds]}]
-                        (if username
-                          (ok
-                           (html
-                            (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
-                                  tap-count   (dec (count recent-taps))]
-                              (map-indexed
-                               (fn [idx {:tap/keys [tap id]}]
-                                 (pages/code-block username id tap (= idx tap-count)))
-                               recent-taps))))
-                          (found "/login")))}]
    ["/login" {:get  (fn [request]
                       (ok (pages/wrap-as-page
                            (pages/login-page request))))
@@ -91,7 +83,7 @@
                        (ok (pages/wrap-as-page
                             (pages/signup-page request))))
                :post (fn [{{:keys [username email password]} :params
-                           :keys                             [ds session]}]
+                           :keys                             [ds]}]
                        (if (migrations/user ds {:email email :username username})
                          (found "/login")
                          (try
@@ -100,10 +92,22 @@
                             {:username username
                              :email    email
                              :password (auth/hash-password password)})
-                           (-> (found "/feed")
-                               (assoc :session (assoc session :username username)))
+                           (found "/login")
                            (catch Exception _
                              (found "/signup")))))}]
+   ["/tap_page" {:get (fn [{{:keys [username]}     :session
+                            {:keys [limit cursor]} :params
+                            :keys                  [ds]}]
+                        (if username
+                          (ok
+                           (html
+                            (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
+                                  tap-count   (dec (count recent-taps))]
+                              (map-indexed
+                               (fn [idx {:tap/keys [tap id]}]
+                                 (pages/code-block username id tap (= idx tap-count)))
+                               recent-taps))))
+                          (found "/login")))}]
    gweb/route
    ["/public/*" (ring/create-file-handler {:root "resources"})]])
 

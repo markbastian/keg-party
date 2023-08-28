@@ -73,8 +73,6 @@
      [:li.nav-item
       [:a.nav-link.active {:href "/clients"} "Clients"]]
      [:li.nav-item
-      [:a.nav-link {:href "#"} "Features"]]
-     [:li.nav-item
       [:a.nav-link {:href "/logout"}
        (format "Logout %s" (:username session))]]]]])
 

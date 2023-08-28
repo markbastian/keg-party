@@ -22,12 +22,22 @@
      [:user_id :int [:not nil]]
      [:created_at :timestamp [:not nil] [:default :current_timestamp]]
      [:tap :text [:not nil]]
-     [:favorite :bool [:not nil] [:default false]]
      [[:foreign-key :user_id] [:references :user :id]]]}))
+
+(def create-favorite-table-ddl
+  (hsql/format
+   {:create-table [:favorite :if-not-exists]
+    :with-columns
+    [[:user_id :int [:not nil]]
+     [:tap_id :int [:not nil]]
+     [[:foreign-key :user_id] [:references :user :id]]
+     [[:foreign-key :tap_id] [:references :tap :id]]
+     [[:primary-key :user_id :tap_id]]]}))
 
 (def migrations
   [create-user-table-ddl
-   create-tap-table-ddl])
+   create-tap-table-ddl
+   create-favorite-table-ddl])
 
 (defn create-user! [ds {:keys [username email password] :as user}]
   {:pre [username email password]}
@@ -69,6 +79,12 @@
 (defn delete-tap! [ds id]
   (sql/delete! ds :tap {:id id}))
 
+(defn favorite [ds user-id tap-id]
+  (sql/insert! ds :favorites {:user_id user-id :tap_id tap-id}))
+
+(defn unfavorite [ds user-id tap-id]
+  (sql/delete! ds :favorites {:user_id user-id :tap_id tap-id}))
+
 (defn get-recent-taps
   ([ds user]
    (get-recent-taps ds user 10))
@@ -98,6 +114,11 @@
 (comment
   (require '[keg-party.system :as system])
   (def ds (:parts.next.jdbc.core/datasource (system/system)))
+
+  (favorite ds 1 1)
+  (read-tap ds 1)
+  (unfavorite ds 1 1)
+  (read-tap ds 1)
 
   (create-user! ds {:username "mbastian" :email "markbastian@gmail.com"})
   (create-user! ds {:username "foo" :email "markbastian@gmail.com"})
