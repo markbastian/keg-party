@@ -45,7 +45,7 @@ Add `keg-party` as a dependency to your project. The suggested way is to add it 
 Configure your environment with the following environment variables:
 - `KEG_PARTY_HOST`, defaults to http://localhost
 - `KEG_PARTY_PORT`, defaults to 3333
-- `KEG_PARTY_USERNAME`, defaults to `(or (env :keg-party-user-id) (env :user))`
+- `KEG_PARTY_USERNAME`, defaults to `(or (env :keg-party-username) (env :user))`
 - `KEG_PARTY_PASSWORD`, no default. This is your password from the setup page.
   - This is the only env var that you _must_ set if you aren't using the defaults.
 
