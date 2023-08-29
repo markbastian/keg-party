@@ -3,11 +3,14 @@
             [generic.client-api :as client-api]
             [hiccup.page :refer [html5]]))
 
-(defn broadcast-tapped-data [clients {:keys [username message-id message]}]
+(defn broadcast-tapped-data [context clients {:keys [username message-id message]}]
+  ;; NOTE: When we start sharing taps this will require a change since favoriting
+  ;; is user-specific so each code block may have a different star color depending
+  ;; on who the user is.
   (let [html (html5
               (pages/notifications-pane
                {:hx-swap-oob "afterbegin"}
-               (pages/code-block username message-id message)))]
+               (pages/code-block context username message-id message)))]
     (client-api/broadcast! clients html)))
 
 (defn broadcast-delete-data [clients message-id]

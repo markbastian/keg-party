@@ -65,9 +65,23 @@
    ["/clients" {:get (fn [request]
                        (ok (pages/wrap-as-page
                             (pages/clients-page request))))}]
-   ["/favorite" {:post   (fn [{{:keys [username message-id]} :params}]
+   ["/favorite" {:post   (fn [{{:keys [username message-id]} :params
+                               :as request}]
+                           (cmd/dispatch-command
+                            request
+                            {:command  :create-favorite-tap
+                             :username username
+                             :message-id message-id})
+                           ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id true))))
-                 :delete (fn [{{:keys [username message-id]} :params}]
+                 :delete (fn [{{:keys [username message-id]} :params
+                               :as request}]
+                           (cmd/dispatch-command
+                            request
+                            {:command  :delete-favorite-tap
+                             :username username
+                             :message-id message-id})
+                           ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id false))))}]
    ["/feed" {:get (fn [request]
                     (ok (pages/wrap-as-page
@@ -105,14 +119,14 @@
                              (found "/signup")))))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
-                            :keys                  [ds]}]
+                            :keys                  [ds] :as request}]
                         (ok
                          (html
                           (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
                                 tap-count   (dec (count recent-taps))]
                             (map-indexed
                              (fn [idx {:tap/keys [tap id]}]
-                               (pages/code-block username id tap (= idx tap-count)))
+                               (pages/code-block request username id tap (= idx tap-count)))
                              recent-taps)))))}]
    gweb/route
    ["/public/*" (ring/create-file-handler {:root "resources"})]])

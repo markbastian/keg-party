@@ -32,9 +32,9 @@
      [:i.fa-solid.fa-star]]))
 
 (defn code-block
-  ([username message-id message]
-   (code-block username message-id message false))
-  ([username message-id message last?]
+  ([context username message-id message]
+   (code-block context username message-id message false))
+  ([{:keys [ds]} username message-id message last?]
    (let [id (format "code-block-%s" message-id)]
      [:div
       (cond->
@@ -62,7 +62,11 @@
            :hx-vals (u/to-json-str {:command    :delete-message
                                     :message-id message-id})}
           [:i.fa-solid.fa-trash]]
-         (favorite-tap-block username message-id false)]]]
+         (favorite-tap-block
+          username
+          message-id
+          (migrations/get-favorite ds {:username username
+                                       :tap-id message-id}))]]]
       [:div.row.align-items-center
        [:div.col [:hr]]
        [:div.col-auto
@@ -101,7 +105,7 @@
           tap-count   (dec (count recent-taps))]
       (map-indexed
        (fn [idx {:tap/keys [tap id]}]
-         (code-block username id tap (= idx tap-count)))
+         (code-block request username id tap (= idx tap-count)))
        recent-taps)))])
 
 (defn login-page [& attributes]
