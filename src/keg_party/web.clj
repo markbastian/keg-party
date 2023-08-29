@@ -42,28 +42,36 @@
           (parse-boolean show-collapse)
           target-id)))))
 
+(defn basic-auth [{{:strs [authorization]} :headers :keys [ds]}]
+  (let [[_ tok] (str/split authorization #" ")
+        [username password] (str/split (u/base64-decode tok) #":")]
+    (when-some [user (migrations/user ds {:username username})]
+      (auth/check-password (:user/password user) password))))
+
+(defn wrap-auth [handler whitelist]
+  (fn [{{:keys [username]} :session
+        :keys              [uri] :as request}]
+    (if (or (whitelist uri)
+            username
+            (basic-auth request))
+      (handler request)
+      (found "/login"))))
+
 (def routes
-  [["/" {:get  (fn [{:keys [session]}]
-                 (if (:username session)
-                   (found "/feed")
-                   (found "/login")))
+  [["/" {:get  (fn [_request]
+                 (found "/feed"))
          :post post-message-handler}]
    ["/collapse" {:post show-expand-collapse-handler}]
-   ["/clients" {:get (fn [{:keys [session] :as request}]
-                       (if (:username session)
-                         (ok (pages/wrap-as-page
-                              (pages/clients-page request)))
-                         (found "/login")))}]
-   ["/favorite" {:post (fn [{:keys [session] :as request}]
-                         (if (:username session)
-                           (ok (pages/wrap-as-page
-                                (pages/feed-page request)))
-                           (found "/login")))}]
-   ["/feed" {:get (fn [{:keys [session] :as request}]
-                    (if (:username session)
-                      (ok (pages/wrap-as-page
-                           (pages/feed-page request)))
-                      (found "/login")))}]
+   ["/clients" {:get (fn [request]
+                       (ok (pages/wrap-as-page
+                            (pages/clients-page request))))}]
+   ["/favorite" {:post   (fn [{{:keys [username message-id]} :params}]
+                           (ok (html (pages/favorite-tap-block username message-id true))))
+                 :delete (fn [{{:keys [username message-id]} :params}]
+                           (ok (html (pages/favorite-tap-block username message-id false))))}]
+   ["/feed" {:get (fn [request]
+                    (ok (pages/wrap-as-page
+                         (pages/feed-page request))))}]
    ["/login" {:get  (fn [request]
                       (ok (pages/wrap-as-page
                            (pages/login-page request))))
@@ -98,16 +106,14 @@
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
                             :keys                  [ds]}]
-                        (if username
-                          (ok
-                           (html
-                            (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
-                                  tap-count   (dec (count recent-taps))]
-                              (map-indexed
-                               (fn [idx {:tap/keys [tap id]}]
-                                 (pages/code-block username id tap (= idx tap-count)))
-                               recent-taps))))
-                          (found "/login")))}]
+                        (ok
+                         (html
+                          (let [recent-taps (migrations/get-recent-taps ds username limit cursor)
+                                tap-count   (dec (count recent-taps))]
+                            (map-indexed
+                             (fn [idx {:tap/keys [tap id]}]
+                               (pages/code-block username id tap (= idx tap-count)))
+                             recent-taps)))))}]
    gweb/route
    ["/public/*" (ring/create-file-handler {:root "resources"})]])
 
@@ -128,6 +134,7 @@
                          parameters/parameters-middleware
                          muuntaja/format-request-middleware
                          coercion/coerce-response-middleware
-                         coercion/coerce-request-middleware]}})
+                         coercion/coerce-request-middleware
+                         [wrap-auth #{"/signup" "/login" "/logout"}]]}})
     ;(ring/create-file-handler {:path "/resources/"})
    (constantly (not-found "Not found"))))
