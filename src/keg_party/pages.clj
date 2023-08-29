@@ -1,10 +1,10 @@
 (ns keg-party.pages
   "Functions to creat server rendered pages."
-  (:require [keg-party.migrations :as migrations]
-            [clojure.pprint :as pp]
-            [generic.client-api :as client-api]
-            [generic.utils :as u]
-            [hiccup.page :refer [html5 include-css include-js]]))
+  (:require
+   [keg-party.migrations :as migrations]
+   [generic.client-api :as client-api]
+   [generic.utils :as u]
+   [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn expand-collapse-block [show-collapse target-id]
   [(if show-collapse
@@ -66,7 +66,7 @@
           username
           message-id
           (migrations/get-favorite ds {:username username
-                                       :tap-id message-id}))]]]
+                                       :tap-id   message-id}))]]]
       [:div.row.align-items-center
        [:div.col [:hr]]
        [:div.col-auto
@@ -77,7 +77,6 @@
   (into [:div#tap-log.p-2] r))
 
 (defn navbar [{:keys [session]}]
-  (pp/pprint {:navbar session})
   [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top
    [:a.navbar-brand {:href "#"}
     [:img {:src   "public/keg_party/rootbeer-sm.png"
