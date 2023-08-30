@@ -39,7 +39,7 @@ Add `keg-party` as a dependency to your project. The suggested way is to add it 
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         com.markbastian/keg-party
         {:git/url "https://github.com/markbastian/keg-party"
-         :sha     "2b9af40112378f371dece94f063fa2cb7566ca2e"}}
+         :sha     "9176e184268c9aa996294c855423bc3c5967ec84"}}
 ```
 
 Configure your environment with the following environment variables:
