@@ -1,10 +1,10 @@
 (ns keg-party.pages
   "Functions to creat server rendered pages."
-  (:require [keg-party.migrations :as migrations]
-            [clojure.pprint :as pp]
-            [generic.client-api :as client-api]
-            [generic.utils :as u]
-            [hiccup.page :refer [html5 include-css include-js]]))
+  (:require
+   [keg-party.migrations :as migrations]
+   [generic.client-api :as client-api]
+   [generic.utils :as u]
+   [hiccup.page :refer [html5 include-css include-js]]))
 
 (defn expand-collapse-block [show-collapse target-id]
   [(if show-collapse
@@ -18,10 +18,27 @@
                                     :target-id     target-id})
     :hx-swap        "outerHTML"}])
 
+(defn favorite-star [username message-id & attributes]
+  [:i.fa-solid.fa-star
+   (into
+    {:id (format "tap-favorite-%s-%s" username message-id)}
+    attributes)])
+
+(defn favorite-tap-block [username message-id favorite?]
+  (let [action (if favorite? :hx-delete :hx-post)]
+    [:button.btn.btn-dark.btn-sm
+     {:hx-vals (u/to-json-str {:username   username
+                               :message-id message-id})
+      action   "/favorite"
+      :hx-swap "outerHTML"}
+     (if favorite?
+       (favorite-star username message-id {:style "color:#FFD700;"})
+       (favorite-star username message-id))]))
+
 (defn code-block
-  ([username message-id message]
-   (code-block username message-id message false))
-  ([username message-id message last?]
+  ([context username message-id message]
+   (code-block context username message-id message false))
+  ([{:keys [ds]} username message-id message last?]
    (let [id (format "code-block-%s" message-id)]
      [:div
       (cond->
@@ -48,7 +65,14 @@
           {:ws-send "true"
            :hx-vals (u/to-json-str {:command    :delete-message
                                     :message-id message-id})}
-          [:i.fa-solid.fa-trash]]]]]
+          [:i.fa-solid.fa-trash]]
+         (let [favorite? (migrations/get-favorite ds {:username username
+                                                      :tap-id   message-id})]
+           (println favorite?)
+           (favorite-tap-block
+            username
+            message-id
+            favorite?))]]]
       [:div.row.align-items-center
        [:div.col [:hr]]
        [:div.col-auto
@@ -59,7 +83,6 @@
   (into [:div#tap-log.p-2] r))
 
 (defn navbar [{:keys [session]}]
-  (pp/pprint {:navbar session})
   [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top
    [:a.navbar-brand {:href "#"}
     [:img {:src   "public/keg_party/rootbeer-sm.png"
@@ -72,8 +95,6 @@
     [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
      [:li.nav-item
       [:a.nav-link.active {:href "/clients"} "Clients"]]
-     [:li.nav-item
-      [:a.nav-link {:href "#"} "Features"]]
      [:li.nav-item
       [:a.nav-link {:href "/logout"}
        (format "Logout %s" (:username session))]]]]])
@@ -89,7 +110,7 @@
           tap-count   (dec (count recent-taps))]
       (map-indexed
        (fn [idx {:tap/keys [tap id]}]
-         (code-block username id tap (= idx tap-count)))
+         (code-block request username id tap (= idx tap-count)))
        recent-taps)))])
 
 (defn login-page [& attributes]

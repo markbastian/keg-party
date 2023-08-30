@@ -19,3 +19,31 @@
   (log/infof "Dispatching command %s for %s" command message-id)
   (migrations/delete-tap! ds message-id)
   (events/delete-tap-message! context message-id))
+
+(defmethod cmd/dispatch-command :create-favorite-tap
+  [{:keys [ds] :as context} {:keys [command username message-id]}]
+  (log/infof "Dispatching command %s for %s" command message-id)
+  (migrations/favorite ds {:username username :tap-id message-id})
+  ;; TODO - At some point, we should broadcast this event, but
+  ;; we really need shared taps first. ATM we only see our own
+  ;; taps and the optimistic update is sufficient. Another failure
+  ;; is if you favorite your tap in one window but have another
+  ;; session open somewhere else you won't get that update until
+  ;; this is live.
+  (events/create-favorite-tap-message!
+   context
+   {:username username :tap-id message-id}))
+
+(defmethod cmd/dispatch-command :delete-favorite-tap
+  [{:keys [ds] :as context} {:keys [command username message-id]}]
+  (log/infof "Dispatching command %s for %s" command message-id)
+  (migrations/unfavorite ds {:username username :tap-id message-id})
+  ;; TODO - At some point, we should broadcast this event, but
+  ;; we really need shared taps first. ATM we only see our own
+  ;; taps and the optimistic update is sufficient. Another failure
+  ;; is if you favorite your tap in one window but have another
+  ;; session open somewhere else you won't get that update until
+  ;; this is live.
+  (events/delete-favorite-tap-message!
+   context
+   {:username username :tap-id message-id}))
