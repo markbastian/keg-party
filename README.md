@@ -94,15 +94,43 @@ Build a deployable jar of this library (Still needs work):
 
 ## TODOs
 
+Features:
 - [X] Persistence
-- [ ] Create protocols for db ops to hide implementation (e.g. users and taps)
 - [ ] Add admin profile concept so that only admins can see client tabs, for example
-- [ ] Expose favorites
+- [X] Expose favorites
+  - [ ] Create favorites view (or do something else with it)
+- [ ] User spaces/channels
+- [ ] Collaborative tap comments
 - [ ] Drill-down/explore individual tap data
+
+Architecture & Tech debt:
+- [ ] Create protocols for db ops to hide implementation (e.g. users and taps)
+- [ ] Make events multimethods as in `dispatch-command`
+  - `generate-event` or `process-event`
+  - Consider - do we combine `htmx-notifications` into `events`?
+    - Will there be other notification types?
+    - Do we care at this point?
+- [ ] Tests
+- [ ] Rename `generic` to something like `ezcmd` or something
+- [ ] Make command-event bridge async
+  - Queue interface
+    - Use core.async for now
+    - Sets it up for something like SQS in the future
+- [ ] Tied to the above, do some sort of event log maybe
+- [ ] With an event log we could batch notifications so we don't hammer the UI with too many taps at once
+- [ ] Refactor `migrations` into something that isn't a terrible name
+- [ ] BUG - When you go to http://localhost:3333/ in a new incognito window you get
+  - `HTTP ERROR 500 Cannot invoke "java.lang.CharSequence.length()" because "this.text" is null`
+  - Why?
+  - If you go to `/login` it gets fine. It should redirect and, in fact, does later on.
+
+Client QoL:
 - [ ] Add args for deps so we can easily launch with -X args
 - [ ] Add client profile so you can just add the profile and connect the tap at launch
+
+Docs:
 - [ ] Documentation with screenshots
-- [ ] User spaces/channels
+- [ ] Tutorials
 
 ## License
 

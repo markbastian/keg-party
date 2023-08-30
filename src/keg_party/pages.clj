@@ -18,18 +18,22 @@
                                     :target-id     target-id})
     :hx-swap        "outerHTML"}])
 
+(defn favorite-star [username message-id & attributes]
+  [:i.fa-solid.fa-star
+   (into
+    {:id (format "tap-favorite-%s-%s" username message-id)}
+    attributes)])
+
 (defn favorite-tap-block [username message-id favorite?]
   (let [action (if favorite? :hx-delete :hx-post)]
     [:button.btn.btn-dark.btn-sm
-     (cond->
-      {:id      (format "tap-favorite-%s-%s" username message-id)
-       :hx-vals (u/to-json-str {:username   username
-                                :message-id message-id})
-       action   "/favorite"
-       :hx-swap "outerHTML"}
-       favorite?
-       (assoc :style "color:#FFD700;"))
-     [:i.fa-solid.fa-star]]))
+     {:hx-vals (u/to-json-str {:username   username
+                               :message-id message-id})
+      action   "/favorite"
+      :hx-swap "outerHTML"}
+     (if favorite?
+       (favorite-star username message-id {:style "color:#FFD700;"})
+       (favorite-star username message-id))]))
 
 (defn code-block
   ([context username message-id message]
@@ -62,11 +66,13 @@
            :hx-vals (u/to-json-str {:command    :delete-message
                                     :message-id message-id})}
           [:i.fa-solid.fa-trash]]
-         (favorite-tap-block
-          username
-          message-id
-          (migrations/get-favorite ds {:username username
-                                       :tap-id   message-id}))]]]
+         (let [favorite? (migrations/get-favorite ds {:username username
+                                                      :tap-id   message-id})]
+           (println favorite?)
+           (favorite-tap-block
+            username
+            message-id
+            favorite?))]]]
       [:div.row.align-items-center
        [:div.col [:hr]]
        [:div.col-auto

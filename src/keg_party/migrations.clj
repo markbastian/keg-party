@@ -77,15 +77,19 @@
   (sql/get-by-id ds :tap id))
 
 (defn delete-tap! [ds id]
-  (sql/delete! ds :tap {:id id}))
+  (let [{:tap/keys [user_id id]} (sql/get-by-id ds :tap id)
+        favorite (first (sql/find-by-keys ds :favorite {:user_id user_id :tap_id id}))]
+    (jdbc/with-transaction [tx ds]
+      (when favorite
+        (sql/delete! tx :favorite {:user_id user_id :tap_id id}))
+      (sql/delete! tx :tap {:id id}))))
 
 (defn get-favorite [ds {:keys [username user-id tap-id]}]
-  (-> (cond
-        user-id (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})
-        username (let [user-id (:user/id (read-user-by-username ds username))]
-                   (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})))
-      seq
-      some?))
+  (let [res (cond
+              user-id (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})
+              username (let [user-id (:user/id (read-user-by-username ds username))]
+                         (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})))]
+    (some? (seq res))))
 
 (defn favorite [ds {:keys [username user-id tap-id]}]
   (cond
