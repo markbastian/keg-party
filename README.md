@@ -16,15 +16,15 @@ configuration section below.
 
 When you connect to the server, you'll be directed to a login page:
 
-![login.png](docs/login.png)
+![login.png](doc/login.png)
 
 If you haven't created an account, follow the "Sign up" link to do so:
 
-![signup.png](docs/signup.png)
+![signup.png](doc/signup.png)
 
 Whether you are logging in to an existing account or creating a new one, you'll be immediately directed to the tap feed once you are signed in:
 
-![feed.png](docs/feed.png)
+![feed.png](doc/feed.png)
 
 Start playing around and have some fun!
 
