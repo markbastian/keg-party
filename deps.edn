@@ -11,6 +11,7 @@
          info.sunng/ring-jetty9-adapter    {:mvn/version "0.22.1"}
          integrant/integrant               {:mvn/version "0.8.1"}
          metosin/jsonista                  {:mvn/version "0.3.7"}
+         metosin/malli                     {:mvn/version "0.11.0"}
          metosin/reitit                    {:mvn/version "0.6.0"}
          metosin/ring-http-response        {:mvn/version "0.9.3"}
          nano-id/nano-id                   {:mvn/version "1.0.0"}

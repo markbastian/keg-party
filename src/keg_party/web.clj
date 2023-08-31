@@ -127,7 +127,8 @@
                                 tap-count   (dec (count recent-taps))]
                             (map-indexed
                              (fn [idx {:tap/keys [tap id]}]
-                               (pages/code-block request username id tap (= idx tap-count)))
+                               (pages/code-block
+                                request username id tap (= idx tap-count)))
                              recent-taps)))))}]
    gweb/route
    ["/public/*" (ring/create-file-handler {:root "resources"})]])

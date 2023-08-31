@@ -114,7 +114,8 @@
       :from      [[:tap :T]]
       :left-join [[:user :U] [:= :U.id :T.user_id]]
       :where     [:= :U.username user]
-      :order-by  [[:created_at :desc]]
+      :order-by  [[:created_at :desc]
+                  [:id :desc]]
       :limit     limit})))
   ([ds user limit cursor]
    (jdbc/execute!
@@ -126,7 +127,8 @@
       :where     [:and
                   [:= :U.username user]
                   [:> cursor :T.id]]
-      :order-by  [[:created_at :desc]]
+      :order-by  [[:created_at :desc]
+                  [:id :desc]]
       :limit     limit}))))
 
 (comment

@@ -39,28 +39,40 @@
   ([context username message-id message]
    (code-block context username message-id message false))
   ([{:keys [ds]} username message-id message last?]
-   (let [id (format "code-block-%s" message-id)]
+   (let [id            (format "code-block-%s" message-id)
+         hljs-code-id  (format "hljs-code-%s" id)
+         copy-toast-id (format "copy-toast-%s" id)]
      [:div
       (cond->
        {:id id}
         last?
         (merge {:hx-get     (format "/tap_page?limit=3&cursor=%s" message-id)
-                :hx-trigger "revealed"
+                :hx-trigger "intersect once"
                 :hx-swap    "afterend"}))
       [:div.collapse.show
        {:id (format "%s-collapse" id)}
-       [:p username]
+       [:span username]
        [:div.d-flex.justify-content-between.align-items-top
         [:div.overflow-auto
          [:pre
-          [:code.language-clojure message]]
-         [:script "hljs.highlightAll();"]]
+          [:code.language-clojure
+           {:id hljs-code-id}
+           message]
+          [:script (format
+                    "hljs.highlightElement(document.getElementById('%s'))"
+                    hljs-code-id)]]]
         [:div.d-flex.flex-column.gap-1
-         [:button.btn.btn-dark.btn-sm
-          {:onclick (format
-                     "navigator.clipboard.writeText(atob('%s'))"
-                     (u/base64-encode message))}
-          [:i.fa-solid.fa-copy]]
+         [:div
+          [:button.btn.btn-dark.btn-sm
+           {:onclick (format
+                      "navigator.clipboard.writeText(atob('%s'));
+                       showToast('%s')"
+                      (u/base64-encode message)
+                      copy-toast-id)}
+           [:i.fa-solid.fa-copy]]
+          [:div.position-fixed.bottom-0.end-0.p-3.w-25
+           [:div.toast {:id copy-toast-id :role "alert"}
+            [:div.toast-body "Copied!"]]]]
          [:button.btn.btn-dark.btn-sm
           {:ws-send "true"
            :hx-vals (u/to-json-str {:command    :delete-message
@@ -68,7 +80,6 @@
           [:i.fa-solid.fa-trash]]
          (let [favorite? (migrations/get-favorite ds {:username username
                                                       :tap-id   message-id})]
-           (println favorite?)
            (favorite-tap-block
             username
             message-id
@@ -106,7 +117,7 @@
     :ws-connect (format "/ws")}
    (navbar request)
    (notifications-pane
-    (let [recent-taps (migrations/get-recent-taps ds username 3)
+    (let [recent-taps (migrations/get-recent-taps ds username 5)
           tap-count   (dec (count recent-taps))]
       (map-indexed
        (fn [idx {:tap/keys [tap id]}]
@@ -197,9 +208,8 @@
     "https://unpkg.com/htmx.org@1.8.4"
     "https://unpkg.com/htmx.org/dist/ext/ws.js"
     "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    "public/keg_party/highlight.min.js")
-    ;[:script (slurp (io/resource "keg_party/highlight.min.js"))]
-   [:script "hljs.highlightAll();"]
+    "public/keg_party/highlight.min.js"
+    "public/keg_party/showtoast.js")
    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
    content))
 

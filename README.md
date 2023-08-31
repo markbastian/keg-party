@@ -132,6 +132,10 @@ Docs:
 - [ ] Documentation with screenshots
 - [ ] Tutorials
 
+Questions:
+- In SQLite can I delete an entry with a FK pointing to it?
+  - It's a stupid pragma thing in SQLite
+
 ## License
 
 Copyright © 2023 Mark Bastian
