@@ -43,10 +43,11 @@
           target-id)))))
 
 (defn basic-auth [{{:strs [authorization]} :headers :keys [ds]}]
-  (let [[_ tok] (str/split authorization #" ")
-        [username password] (str/split (u/base64-decode tok) #":")]
-    (when-some [user (migrations/user ds {:username username})]
-      (auth/check-password (:user/password user) password))))
+  (when (string? authorization)
+    (when-some [tok (second (str/split authorization #" "))]
+      (let [[username password] (str/split (u/base64-decode tok) #":")]
+        (when-some [user (migrations/user ds {:username username})]
+          (auth/check-password (:user/password user) password))))))
 
 (defn wrap-auth [handler whitelist]
   (fn [{{:keys [username]} :session
