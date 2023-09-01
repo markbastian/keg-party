@@ -8,11 +8,23 @@
 
 Start your party by launching a server with one of the following options:
 
+#### The super easy way
+```shell
+clojure -Sdeps '{:deps {com.github.markbastian/keg-party
+                  {:git/url "https://github.com/markbastian/keg-party"
+                  :sha     "5e35bf66a3fa761d7d4ae133c564bce55a7a9c66"}}}'
+                   -X keg-party.main/run
+```
+
+#### Other ways
+
 - `clj -X keg-party.main/run` from the cloned project
 - Build an uberjar with `clojure -X:uberjar` then run it with `java -jar keg-party.jar`
 
 By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the
 configuration section below.
+
+### The initial experience
 
 When you connect to the server, you'll be directed to a login page:
 
@@ -99,6 +111,7 @@ Features:
 - [ ] Add admin profile concept so that only admins can see client tabs, for example
 - [X] Expose favorites
   - [ ] Create favorites view (or do something else with it)
+  - [X] Add "nuke all non favorites" option
 - [ ] User spaces/channels
 - [ ] Collaborative tap comments
 - [ ] Drill-down/explore individual tap data
@@ -119,7 +132,7 @@ Architecture & Tech debt:
 - [ ] Tied to the above, do some sort of event log maybe
 - [ ] With an event log we could batch notifications so we don't hammer the UI with too many taps at once
 - [ ] Refactor `migrations` into something that isn't a terrible name
-- [ ] BUG - When you go to http://localhost:3333/ in a new incognito window you get
+- [X] BUG - When you go to http://localhost:3333/ in a new incognito window you get
   - `HTTP ERROR 500 Cannot invoke "java.lang.CharSequence.length()" because "this.text" is null`
   - Why?
   - If you go to `/login` it gets fine. It should redirect and, in fact, does later on.

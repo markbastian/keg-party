@@ -12,11 +12,13 @@
                           :accept    :htmx
                           :ws        ws})))
 
-(defn on-text [{{:keys [_username session-id]} :session :as context} _ws text-message]
+(defn on-text [{{:keys [username session-id]} :session :as context} _ws text-message]
   (let [json    (u/read-json text-message)
         command (-> json
                     (update :command keyword)
-                    (assoc :client-id session-id))]
+                    (assoc
+                     :username username
+                     :client-id session-id))]
     (log/debugf "client-id: %s command: %s" session-id command)
     (cmd/dispatch-command context command)))
 

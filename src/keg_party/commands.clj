@@ -47,3 +47,9 @@
   (events/delete-favorite-tap-message!
    context
    {:username username :tap-id message-id}))
+
+(defmethod cmd/dispatch-command :delete-unstarred-taps
+  [{:keys [ds] :as context} {:keys [command username message-id]}]
+  (log/infof "Dispatching command %s for %s" command message-id)
+  (let [ids (migrations/delete-unstarred-taps! ds username)]
+    (events/bulk-delete-tap-messages! context (map :id ids))))

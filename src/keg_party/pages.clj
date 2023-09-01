@@ -66,7 +66,7 @@
           [:button.btn.btn-dark.btn-sm
            {:onclick (format
                       "navigator.clipboard.writeText(atob('%s'));
-                       showToast('%s')"
+                        showToast('%s')"
                       (u/base64-encode message)
                       copy-toast-id)}
            [:i.fa-solid.fa-copy]]
@@ -106,6 +106,11 @@
     [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
      [:li.nav-item
       [:a.nav-link.active {:href "/clients"} "Clients"]]
+     [:li.nav-item
+      [:a.nav-link.active
+       {:href "#"
+        :ws-send "true"
+        :hx-vals (u/to-json-str {:command :delete-unstarred-taps})} "Delete Unstarred"]]
      [:li.nav-item
       [:a.nav-link {:href "/logout"}
        (format "Logout %s" (:username session))]]]]])

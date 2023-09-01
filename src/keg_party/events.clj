@@ -33,6 +33,14 @@
                         :hx-swap-oob "delete"}])]
     (client-api/broadcast! clients html)))
 
+(defn bulk-delete-tap-messages! [{:keys [client-manager]} message-ids]
+  (let [clients (client-api/clients client-manager)
+        html    (html
+                 (for [message-id message-ids]
+                   [:div {:id          (format "code-block-%s" message-id)
+                          :hx-swap-oob "delete"}]))]
+    (client-api/broadcast! clients html)))
+
 (defn create-favorite-tap-message! [{:keys [client-manager]}
                                     {:keys [username tap-id]}]
   (let [clients (client-api/clients client-manager username)
