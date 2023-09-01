@@ -2,8 +2,8 @@
   (:require
    [keg-party.auth :as auth]
    [keg-party.commands]
-   [keg-party.domain-api :as domain-api]
    [keg-party.pages :as pages]
+   [keg-party.repository :as repository]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [generic.commands :as cmd]
@@ -19,11 +19,11 @@
    [ring.middleware.session.cookie :refer [cookie-store]]
    [ring.util.http-response :refer [forbidden found not-found ok unauthorized]]))
 
-(defn post-message-handler [{{:strs [authorization]} :headers :keys [api body] :as request}]
+(defn post-message-handler [{{:strs [authorization]} :headers :keys [repo body] :as request}]
   (log/info "Posting message")
   (let [[_ tok] (str/split authorization #" ")
         [username password] (str/split (u/base64-decode tok) #":")]
-    (if-some [user (domain-api/user api {:username username})]
+    (if-some [user (repository/user repo {:username username})]
       (if (auth/check-password (:user/password user) password)
         (do
           (cmd/dispatch-command
@@ -42,11 +42,11 @@
           (parse-boolean show-collapse)
           target-id)))))
 
-(defn basic-auth [{{:strs [authorization]} :headers :keys [api]}]
+(defn basic-auth [{{:strs [authorization]} :headers :keys [repo]}]
   (when (string? authorization)
     (when-some [tok (second (str/split authorization #" "))]
       (let [[username password] (str/split (u/base64-decode tok) #":")]
-        (when-some [user (domain-api/user api {:username username})]
+        (when-some [user (repository/user repo {:username username})]
           (auth/check-password (:user/password user) password))))))
 
 (defn wrap-auth [handler whitelist]
@@ -90,8 +90,8 @@
    ["/login" {:get  (fn [request]
                       (ok (pages/wrap-as-page
                            (pages/login-page request))))
-              :post (fn [{{:keys [username password]} :params :keys [api]}]
-                      (if-some [user (domain-api/user api {:username username})]
+              :post (fn [{{:keys [username password]} :params :keys [repo]}]
+                      (if-some [user (repository/user repo {:username username})]
                         (if (auth/check-password (:user/password user) password)
                           (-> (found "/feed")
                               (update :session assoc
@@ -106,12 +106,12 @@
                        (ok (pages/wrap-as-page
                             (pages/signup-page request))))
                :post (fn [{{:keys [username email password]} :params
-                           :keys                             [api]}]
-                       (if (domain-api/user api {:email email :username username})
+                           :keys                             [repo]}]
+                       (if (repository/user repo {:email email :username username})
                          (found "/login")
                          (try
-                           (domain-api/create-user!
-                            api
+                           (repository/create-user!
+                            repo
                             {:username username
                              :email    email
                              :password (auth/hash-password password)})
@@ -120,10 +120,10 @@
                              (found "/signup")))))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
-                            :keys                  [api] :as request}]
+                            :keys                  [repo] :as request}]
                         (ok
                          (html
-                          (let [recent-taps (domain-api/get-recent-taps api username limit cursor)
+                          (let [recent-taps (repository/get-recent-taps repo username limit cursor)
                                 tap-count   (dec (count recent-taps))]
                             (map-indexed
                              (fn [idx {:tap/keys [tap id]}]

@@ -1,6 +1,6 @@
-(ns keg-party.domain-sql-impl
+(ns keg-party.repository.sql-repository
   (:require
-   [keg-party.domain-api :as api]
+   [keg-party.repository :as repository]
    [honey.sql :as hsql]
    [next.jdbc :as jdbc]
    [next.jdbc.result-set :as result-set]
@@ -9,7 +9,7 @@
 (defrecord CommandSqlImpl [ds])
 
 (extend-type CommandSqlImpl
-  api/IUserStore
+  repository/IUserStore
   (create-user! [{:keys [ds]} {:keys [username email password] :as user}]
     {:pre [username email password]}
     (sql/insert! ds :user (select-keys user [:username :email :password])))
@@ -25,7 +25,7 @@
                   email
                   (assoc :email email))]
         (first (sql/find-by-keys ds :user arg)))))
-  api/ITapStore
+  repository/ITapStore
   (create-tap! [{:keys [ds]} {:keys [user-id tap]}]
     {:pre [user-id tap]}
     ((keyword "last_insert_rowid()")
@@ -43,7 +43,7 @@
         (sql/delete! tx :tap {:id id}))))
   (get-recent-taps
     ([this user]
-     (api/get-recent-taps this user 10))
+     (repository/get-recent-taps this user 10))
     ([{:keys [ds]} user limit]
      (jdbc/execute!
       ds
@@ -85,23 +85,23 @@
        :where     [:in :id :unstarred]
        :returning :id})
      {:builder-fn result-set/as-unqualified-kebab-maps}))
-  api/IFavoriteStore
+  repository/IFavoriteStore
   (get-favorite [{:keys [ds] :as this} {:keys [username user-id tap-id]}]
     (let [res (cond
                 user-id (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})
-                username (let [user-id (:user/id (api/user this {:username username :id user-id}))]
+                username (let [user-id (:user/id (repository/user this {:username username :id user-id}))]
                            (sql/find-by-keys ds :favorite {:user_id user-id :tap_id tap-id})))]
       (some? (seq res))))
   (favorite [{:keys [ds] :as this} {:keys [username user-id tap-id]}]
     (cond
       user-id (sql/insert! ds :favorite {:user_id user-id :tap_id tap-id})
-      username (let [user-id (:user/id (api/user this {:username username :id user-id}))]
+      username (let [user-id (:user/id (repository/user this {:username username :id user-id}))]
                  (sql/insert! ds :favorite {:user_id user-id :tap_id tap-id}))))
 
   (unfavorite [{:keys [ds] :as this} {:keys [username user-id tap-id]}]
     (cond
       user-id (sql/delete! ds :favorite {:user_id user-id :tap_id tap-id})
-      username (let [user-id (:user/id (api/user this {:username username :id user-id}))]
+      username (let [user-id (:user/id (repository/user this {:username username :id user-id}))]
                  (sql/delete! ds :favorite {:user_id user-id :tap_id tap-id})))))
 
 (defn instance [ds]
@@ -112,4 +112,4 @@
   (def ds (:parts.next.jdbc.core/datasource (system/system)))
 
   (let [impl (->CommandSqlImpl ds)]
-    (api/users impl)))
+    (repository/users impl)))

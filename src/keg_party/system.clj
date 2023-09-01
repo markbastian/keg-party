@@ -1,7 +1,7 @@
 (ns keg-party.system
   (:require
-   [keg-party.domain-sql-impl :as domain-sql-impl]
    [keg-party.migrations :as migrations]
+   [keg-party.repository.sql-repository :as sql-repo]
    [keg-party.web :as web]
    [environ.core :refer [env]]
    [generic.client-api :as client-api]
@@ -23,9 +23,8 @@
    ::jetty9/server   {:host           "0.0.0.0"
                       :port           (parse-long (env :keg-party-port "3333"))
                       :join?          false
-                      :ds             (ig/ref ::jdbc/datasource)
                       :client-manager (client-api/atomic-client-manager)
-                      :api            (domain-sql-impl/instance (ig/ref ::jdbc/datasource))
+                      :repo           (sql-repo/instance (ig/ref ::jdbc/datasource))
                       :ws-handlers    (ig/ref ::ws/ws-handlers)
                       :handler        #'web/handler}})
 

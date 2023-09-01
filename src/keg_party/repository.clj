@@ -1,4 +1,4 @@
-(ns keg-party.domain-api)
+(ns keg-party.repository)
 
 (defprotocol IUserStore
   (create-user! [_ {:keys [username email password] :as user}])
