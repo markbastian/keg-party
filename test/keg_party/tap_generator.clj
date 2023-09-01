@@ -18,4 +18,21 @@
 
 (comment
   (doseq [a (mg/sample address)]
-    (tap> a)))
+    (tap> a))
+
+  ;; A code form
+  (tap>
+   '(defn start!
+      ([config]
+       (alter-var-root #'*system* (fn [s] (if-not s (ig/init config) s))))
+      ([] (start! config))))
+
+  ;; A matrix
+  (tap> (vec (repeatedly 10 #(vec (repeatedly 10 (fn [] (rand-int 10)))))))
+
+  ;; A tall tap
+  (tap> (into {} (for [i (range 100)]
+                   [(keyword (str "key-" i)) i])))
+
+  ;; A wide tap
+  (tap> (apply str (repeat 1000 "X"))))

@@ -2,6 +2,7 @@
   (:require
    [honey.sql :as hsql]
    [next.jdbc :as jdbc]
+   [next.jdbc.result-set :as result-set]
    [next.jdbc.sql :as sql]))
 
 (def create-user-table-ddl
@@ -131,9 +132,29 @@
                   [:id :desc]]
       :limit     limit}))))
 
+(defn delete-unstarred-taps! [ds username]
+  (jdbc/execute!
+   ds
+   (hsql/format
+    {:with      [[[:unstarred]
+                  {:select    [[:T.id]]
+                   :from      [[:tap :T]]
+                   :left-join [[:user :U] [:= :U.id :T.user_id]
+                               [:favorite :F] [:= :F.tap_id :T.id]]
+                   :where     [:and
+                               [:= :U.username username]
+                               [:= :F.tap_id nil]]}]]
+     :delete    []
+     :from      [:tap]
+     :where     [:in :id :unstarred]
+     :returning :id})
+   {:builder-fn result-set/as-unqualified-kebab-maps}))
+
 (comment
   (require '[keg-party.system :as system])
   (def ds (:parts.next.jdbc.core/datasource (system/system)))
+
+  (delete-unstarred-taps! ds "mbastian")
 
   (favorite ds {:user-id 1 :tap-id 4})
   (favorite ds {:username "mbastian" :tap-id 3})
