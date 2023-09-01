@@ -25,10 +25,10 @@
         [username password] (str/split (u/base64-decode tok) #":")]
     (if-some [user (repository/user repo {:username username})]
       (if (auth/check-password (:user/password user) password)
-        (do
+        (let [message (u/base64-decode (slurp body))]
           (cmd/dispatch-command
            request
-           {:message  (u/base64-decode (slurp body))
+           {:message  message
             :username username
             :command  :tap-message})
           (ok "ACK"))

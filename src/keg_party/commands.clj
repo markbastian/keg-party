@@ -6,8 +6,8 @@
    [generic.commands :as cmd]))
 
 (defmethod cmd/dispatch-command :tap-message
-  [{:keys [ds repo] :as context} {:keys [command username message] :as m}]
-  {:pre [ds command username message]}
+  [{:keys [repo] :as context} {:keys [command username message] :as m}]
+  {:pre [repo command username message]}
   (log/infof "Dispatching command: %s" command)
   (if-some [user-id (:user/id (repository/user repo {:username username}))]
     (let [message-id (repository/create-tap! repo {:user-id user-id :tap message})]
