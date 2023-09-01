@@ -1,13 +1,15 @@
 (ns keg-party.system
-  (:require [keg-party.migrations :as migrations]
-            [keg-party.web :as web]
-            [environ.core :refer [env]]
-            [generic.client-api :as client-api]
-            [generic.ws-handlers :as ws-handlers]
-            [integrant.core :as ig]
-            [parts.next.jdbc.core :as jdbc]
-            [parts.ring.adapter.jetty9.core :as jetty9]
-            [parts.ws-handler :as ws]))
+  (:require
+   [keg-party.domain-sql-impl :as domain-sql-impl]
+   [keg-party.migrations :as migrations]
+   [keg-party.web :as web]
+   [environ.core :refer [env]]
+   [generic.client-api :as client-api]
+   [generic.ws-handlers :as ws-handlers]
+   [integrant.core :as ig]
+   [parts.next.jdbc.core :as jdbc]
+   [parts.ring.adapter.jetty9.core :as jetty9]
+   [parts.ws-handler :as ws]))
 
 (def config
   {::jdbc/datasource {:dbtype "sqlite"
@@ -23,6 +25,7 @@
                       :join?          false
                       :ds             (ig/ref ::jdbc/datasource)
                       :client-manager (client-api/atomic-client-manager)
+                      :api            (domain-sql-impl/instance (ig/ref ::jdbc/datasource))
                       :ws-handlers    (ig/ref ::ws/ws-handlers)
                       :handler        #'web/handler}})
 

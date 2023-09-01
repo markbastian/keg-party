@@ -1,7 +1,7 @@
 (ns keg-party.pages
   "Functions to creat server rendered pages."
   (:require
-   [keg-party.migrations :as migrations]
+   [keg-party.domain-api :as domain-api]
    [generic.client-api :as client-api]
    [generic.utils :as u]
    [hiccup.page :refer [html5 include-css include-js]]))
@@ -38,7 +38,7 @@
 (defn code-block
   ([context username message-id message]
    (code-block context username message-id message false))
-  ([{:keys [ds]} username message-id message last?]
+  ([{:keys [api]} username message-id message last?]
    (let [id            (format "code-block-%s" message-id)
          hljs-code-id  (format "hljs-code-%s" id)
          copy-toast-id (format "copy-toast-%s" id)]
@@ -66,7 +66,7 @@
           [:button.btn.btn-dark.btn-sm
            {:onclick (format
                       "navigator.clipboard.writeText(atob('%s'));
-                        showToast('%s')"
+                         showToast('%s')"
                       (u/base64-encode message)
                       copy-toast-id)}
            [:i.fa-solid.fa-copy]]
@@ -78,8 +78,8 @@
            :hx-vals (u/to-json-str {:command    :delete-message
                                     :message-id message-id})}
           [:i.fa-solid.fa-trash]]
-         (let [favorite? (migrations/get-favorite ds {:username username
-                                                      :tap-id   message-id})]
+         (let [favorite? (domain-api/get-favorite api {:username username
+                                                       :tap-id   message-id})]
            (favorite-tap-block
             username
             message-id
@@ -108,7 +108,7 @@
       [:a.nav-link.active {:href "/clients"} "Clients"]]
      [:li.nav-item
       [:a.nav-link.active
-       {:href "#"
+       {:href    "#"
         :ws-send "true"
         :hx-vals (u/to-json-str {:command :delete-unstarred-taps})} "Delete Unstarred"]]
      [:li.nav-item
@@ -116,13 +116,13 @@
        (format "Logout %s" (:username session))]]]]])
 
 (defn feed-page [{{:keys [username]} :session
-                  :keys              [ds] :as request}]
+                  :keys              [api] :as request}]
   [:div
    {:hx-ext     "ws"
     :ws-connect (format "/ws")}
    (navbar request)
    (notifications-pane
-    (let [recent-taps (migrations/get-recent-taps ds username 5)
+    (let [recent-taps (domain-api/get-recent-taps api username 5)
           tap-count   (dec (count recent-taps))]
       (map-indexed
        (fn [idx {:tap/keys [tap id]}]

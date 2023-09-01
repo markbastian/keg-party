@@ -115,6 +115,7 @@ Features:
 - [ ] User spaces/channels
 - [ ] Collaborative tap comments
 - [ ] Drill-down/explore individual tap data
+- [ ] When you sign up, show a page with a hint (copyable code?) for how to setup your tap target
 
 Architecture & Tech debt:
 - [ ] Create protocols for db ops to hide implementation (e.g. users and taps)
@@ -136,6 +137,13 @@ Architecture & Tech debt:
   - `HTTP ERROR 500 Cannot invoke "java.lang.CharSequence.length()" because "this.text" is null`
   - Why?
   - If you go to `/login` it gets fine. It should redirect and, in fact, does later on.
+
+Bugs:
+- [ ] 3 starred taps, then add like 20 unstarred taps. Delete the unstarred taps.
+  - The starred don't jump to the top, you have to refresh
+  - How do I fix this?
+  - Probably just a full swap since this is so destructive
+    - Instead of nuking the unstarred on the FE just reload with 10 starred
 
 Client QoL:
 - [ ] Add args for deps so we can easily launch with -X args
