@@ -9,3 +9,4 @@
   - stateful: I/o, disk, db, sockets
   - NOT serializable as data
 - All data polymorphism uses multimethods
+- Use the [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html) for storage

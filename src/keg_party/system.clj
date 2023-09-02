@@ -1,19 +1,28 @@
 (ns keg-party.system
-  (:require [keg-party.migrations :as migrations]
-            [keg-party.web :as web]
-            [environ.core :refer [env]]
-            [generic.client-api :as client-api]
-            [generic.ws-handlers :as ws-handlers]
-            [integrant.core :as ig]
-            [parts.next.jdbc.core :as jdbc]
-            [parts.ring.adapter.jetty9.core :as jetty9]
-            [parts.ws-handler :as ws]))
+  (:require
+   [keg-party.migrations :as migrations]
+   [keg-party.repository :as repository-api]
+   [keg-party.repository.sql-repository :as sql-repo]
+   [keg-party.web :as web]
+   [clojure.tools.logging :as log]
+   [environ.core :refer [env]]
+   [generic.client-api :as client-api]
+   [generic.ws-handlers :as ws-handlers]
+   [integrant.core :as ig]
+   [parts.next.jdbc.core :as jdbc]
+   [parts.ring.adapter.jetty9.core :as jetty9]
+   [parts.ws-handler :as ws]))
+
+(defmethod ig/init-key ::repository [_ {:keys [ds]}]
+  (log/debug "Creating repository")
+  (sql-repo/instance ds))
 
 (def config
   {::jdbc/datasource {:dbtype "sqlite"
                       :dbname "keg-party.db"}
    ::jdbc/migrations {:db         (ig/ref ::jdbc/datasource)
                       :migrations migrations/migrations}
+   ::repository      {:ds (ig/ref ::jdbc/datasource)}
    ::ws/ws-handlers  {:on-connect #'ws-handlers/on-connect
                       :on-text    #'ws-handlers/on-text
                       :on-close   #'ws-handlers/on-close
@@ -21,8 +30,8 @@
    ::jetty9/server   {:host           "0.0.0.0"
                       :port           (parse-long (env :keg-party-port "3333"))
                       :join?          false
-                      :ds             (ig/ref ::jdbc/datasource)
                       :client-manager (client-api/atomic-client-manager)
+                      :repo           (ig/ref ::repository)
                       :ws-handlers    (ig/ref ::ws/ws-handlers)
                       :handler        #'web/handler}})
 
@@ -46,4 +55,8 @@
   (start!)
   (stop!)
   (restart!)
-  (system))
+  (system)
+
+  (let [repo (::repository (system))]
+    (repository-api/users repo)
+    (repository-api/user repo {:username "mbastian"})))
