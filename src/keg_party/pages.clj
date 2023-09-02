@@ -66,7 +66,7 @@
           [:button.btn.btn-dark.btn-sm
            {:onclick (format
                       "navigator.clipboard.writeText(atob('%s'));
-                         showToast('%s')"
+                          showToast('%s')"
                       (u/base64-encode message)
                       copy-toast-id)}
            [:i.fa-solid.fa-copy]]
@@ -115,19 +115,22 @@
       [:a.nav-link {:href "/logout"}
        (format "Logout %s" (:username session))]]]]])
 
-(defn feed-page [{{:keys [username]} :session
-                  :keys              [repo] :as request}]
+(defn recent-taps [{{:keys [username]} :session
+                    :keys              [repo] :as request}]
+  (let [recent-taps (repository/get-recent-taps repo username 5)
+        tap-count   (dec (count recent-taps))]
+    (map-indexed
+     (fn [idx {:tap/keys [tap id]}]
+       (code-block request username id tap (= idx tap-count)))
+     recent-taps)))
+
+(defn feed-page [request]
   [:div
    {:hx-ext     "ws"
     :ws-connect (format "/ws")}
    (navbar request)
    (notifications-pane
-    (let [recent-taps (repository/get-recent-taps repo username 5)
-          tap-count   (dec (count recent-taps))]
-      (map-indexed
-       (fn [idx {:tap/keys [tap id]}]
-         (code-block request username id tap (= idx tap-count)))
-       recent-taps)))])
+    (recent-taps request))])
 
 (defn login-page [& attributes]
   [:div (into

@@ -51,5 +51,6 @@
 (defmethod cmd/dispatch-command :delete-unstarred-taps
   [{:keys [repo] :as context} {:keys [command username message-id]}]
   (log/infof "Dispatching command %s for %s" command message-id)
-  (let [ids (repository/delete-unstarred-taps! repo username)]
-    (events/bulk-delete-tap-messages! context (map :id ids))))
+  (when (seq (repository/delete-unstarred-taps! repo username))
+    ;(events/bulk-delete-tap-messages! context (map :id ids))
+    (events/bulk-reset-tap-messages! context)))

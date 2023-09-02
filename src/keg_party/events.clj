@@ -41,6 +41,14 @@
                           :hx-swap-oob "delete"}]))]
     (client-api/broadcast! clients html)))
 
+(defn bulk-reset-tap-messages! [{:keys [client-manager] :as context}]
+  (let [clients (client-api/clients client-manager)
+        html    (html
+                 (pages/notifications-pane
+                  {:hx-swap-oob "true"}
+                  (pages/recent-taps context)))]
+    (client-api/broadcast! clients html)))
+
 (defn create-favorite-tap-message! [{:keys [client-manager]}
                                     {:keys [username tap-id]}]
   (let [clients (client-api/clients client-manager username)
