@@ -53,4 +53,6 @@
   (log/infof "Dispatching command %s for %s" command message-id)
   (when (seq (repository/delete-unstarred-taps! repo username))
     ;(events/bulk-delete-tap-messages! context (map :id ids))
-    (events/bulk-reset-tap-messages! context)))
+    (events/bulk-reset-tap-messages!
+     context
+     {:username username})))
