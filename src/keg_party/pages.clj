@@ -2,6 +2,7 @@
   "Functions to creat server rendered pages."
   (:require
    [keg-party.repository :as repository]
+   [clojure.edn :as edn]
    [generic.client-api :as client-api]
    [generic.utils :as u]
    [hiccup.page :refer [html5 include-css include-js]]))
@@ -66,13 +67,16 @@
           [:button.btn.btn-dark.btn-sm
            {:onclick (format
                       "navigator.clipboard.writeText(atob('%s'));
-                          showToast('%s')"
+                           showToast('%s')"
                       (u/base64-encode message)
                       copy-toast-id)}
            [:i.fa-solid.fa-copy]]
           [:div.position-fixed.bottom-0.end-0.p-3.w-25
            [:div.toast {:id copy-toast-id :role "alert"}
             [:div.toast-body "Copied!"]]]]
+         [:a {:href (format "tap/%s" message-id)}
+          [:button.btn.btn-dark.btn-sm
+           [:i.fa-solid.fa-bore-hole]]]
          [:button.btn.btn-dark.btn-sm
           {:ws-send "true"
            :hx-vals (u/to-json-str {:command    :delete-message
@@ -204,21 +208,67 @@
        [:td (if (some? ws) "ws" "?")]]))
    [:p [:a {:href "/feed"} "Feed"]]])
 
+(defn detail-code-block [{tap-id :tap/id :as _tap} code-str]
+  (let [hljs-code-id (format "tap-detail-%s" tap-id)]
+    [:pre
+     {:id (format "pre-%s" hljs-code-id)}
+     [:code.language-clojure
+      {:id hljs-code-id}
+      code-str]
+     [:script (format
+               "hljs.highlightElement(document.getElementById('%s'))"
+               hljs-code-id)]]))
+
+(defn tap-detail-page [request {tap-id :tap/id :as tap}]
+  (let [hljs-code-id (format "tap-detail-%s" tap-id)
+        code-str     (:tap/tap tap)
+        data-keys    (sort (keys (edn/read-string code-str)))]
+    [:div
+     (navbar request)
+     [:div.row.p-2
+      [:div.col-sm-2
+       [:div.card
+        [:div.card-body
+         [:form
+          {:hx-post (format "/tap/%s" tap-id)}
+          (for [data-key data-keys]
+            [:div.form-group.p-1
+             [:input
+              {:id      (format "tap-detail-%s-%s-selected" tap-id (name data-key))
+               :type    "checkbox"
+               :name    (str data-key)
+               :checked "true"}]
+             [:label (str data-key)]])
+          [:div.d-grid.p-2
+           [:button.btn.btn-primary.btn-dark.btn-sm
+            {:type      "submit"
+             :hx-post   (format "/tap/%s" tap-id)
+             :hx-swap   "outerHTML"
+             :hx-target (format "#pre-%s" hljs-code-id)}
+            "Filter"]]]]]]
+      [:div.col-sm-10
+       [:div.overflow-auto
+        (detail-code-block
+         tap
+         code-str)]]]]))
+
 (defn wrap-as-page [content]
   (html5
-   (include-css
-    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-    "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/intellij-light.min.css"
-      ;"//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
-    )
-   (include-js
-    "https://unpkg.com/htmx.org@1.8.4"
-    "https://unpkg.com/htmx.org/dist/ext/ws.js"
-    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    "public/keg_party/highlight.min.js"
-    "public/keg_party/showtoast.js")
-   [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+   [:head
+    [:base {:href "/"}]
+    (include-css
+     "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/intellij-light.min.css"
+       ;"//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
+     )
+    (include-js
+     "https://unpkg.com/htmx.org@1.8.4"
+     "https://unpkg.com/htmx.org/dist/ext/ws.js"
+     "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+     "public/keg_party/highlight.min.js"
+     "public/keg_party/showtoast.js")
+    [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]]
    content))
 
 (defn landing-page-html [_request]

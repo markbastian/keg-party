@@ -7,7 +7,7 @@
 (def address
   (m/schema
    [:map
-    [:id string?]
+    [:id [:string {:min 1 :max 8}]]
     [:tags [:set keyword?]]
     [:address
      [:map

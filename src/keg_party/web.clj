@@ -4,6 +4,8 @@
    [keg-party.commands]
    [keg-party.pages :as pages]
    [keg-party.repository :as repository]
+   [clojure.edn :as edn]
+   [clojure.pprint :as pp]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [generic.commands :as cmd]
@@ -67,20 +69,20 @@
                        (ok (pages/wrap-as-page
                             (pages/clients-page request))))}]
    ["/favorite" {:post   (fn [{{:keys [username message-id]} :params
-                               :as request}]
+                               :as                           request}]
                            (cmd/dispatch-command
                             request
-                            {:command  :create-favorite-tap
-                             :username username
+                            {:command    :create-favorite-tap
+                             :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id true))))
                  :delete (fn [{{:keys [username message-id]} :params
-                               :as request}]
+                               :as                           request}]
                            (cmd/dispatch-command
                             request
-                            {:command  :delete-favorite-tap
-                             :username username
+                            {:command    :delete-favorite-tap
+                             :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id false))))}]
@@ -118,6 +120,25 @@
                            (found "/login")
                            (catch Exception _
                              (found "/signup")))))}]
+   ["/tap/:tap-id" {:get (fn [{{:keys [tap-id]} :path-params
+                               :keys            [repo] :as request}]
+                           (if-some [tap (repository/tap repo {:id tap-id})]
+                             (ok
+                              (pages/wrap-as-page
+                               (pages/tap-detail-page request tap)))
+                             (not-found "Pound Sand")))
+                    :post (fn [{{:keys [tap-id]} :path-params
+                                :keys [params repo]}]
+                            (let [selected (set (mapv edn/read-string (keys params)))
+                                  tap (repository/tap repo {:id tap-id})
+                                  code-str     (:tap/tap tap)
+                                  data         (cond-> (edn/read-string code-str)
+                                                 (seq selected)
+                                                 (select-keys selected))]
+                              (ok (html
+                                   (pages/detail-code-block
+                                    tap
+                                    (with-out-str (pp/pprint data)))))))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
                             :keys                  [repo] :as request}]

@@ -137,6 +137,7 @@ Architecture & Tech debt:
   - `HTTP ERROR 500 Cannot invoke "java.lang.CharSequence.length()" because "this.text" is null`
   - Why?
   - If you go to `/login` it gets fine. It should redirect and, in fact, does later on.
+- [ ] Refactor repository signatures to always take a partial object map of tap, user, etc.
 
 Bugs:
 - [X] 3 starred taps, then add like 20 unstarred taps. Delete the unstarred taps.
