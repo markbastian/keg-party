@@ -5,7 +5,6 @@
    [keg-party.pages :as pages]
    [keg-party.repository :as repository]
    [clojure.edn :as edn]
-   [clojure.pprint :as pp]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [generic.commands :as cmd]
@@ -19,6 +18,7 @@
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
    [ring.middleware.json :refer [wrap-json-response]]
    [ring.middleware.session.cookie :refer [cookie-store]]
+   [ring.util.codec :as codec]
    [ring.util.http-response :refer [forbidden found not-found ok unauthorized]]))
 
 (defn post-message-handler [{{:strs [authorization]} :headers :keys [repo body] :as request}]
@@ -120,25 +120,33 @@
                            (found "/login")
                            (catch Exception _
                              (found "/signup")))))}]
-   ["/tap/:tap-id" {:get (fn [{{:keys [tap-id]} :path-params
-                               :keys            [repo] :as request}]
-                           (if-some [tap (repository/tap repo {:id tap-id})]
-                             (ok
-                              (pages/wrap-as-page
-                               (pages/tap-detail-page request tap)))
-                             (not-found "Pound Sand")))
-                    :post (fn [{{:keys [tap-id]} :path-params
-                                :keys [params repo]}]
-                            (let [selected (set (mapv edn/read-string (keys params)))
-                                  tap (repository/tap repo {:id tap-id})
-                                  code-str     (:tap/tap tap)
-                                  data         (cond-> (edn/read-string code-str)
-                                                 (seq selected)
-                                                 (select-keys selected))]
-                              (ok (html
-                                   (pages/detail-code-block
-                                    tap
-                                    (with-out-str (pp/pprint data)))))))}]
+   ["/tap/{*path}" {:get  (fn [{{:keys [path]} :path-params
+                                :keys          [repo] :as request}]
+                            (let [[tap-id & r] (->> (str/split path #"/")
+                                                    (map (comp edn/read-string codec/url-decode)))
+                                  drill-path (vec r)]
+                              (if-some [tap (repository/tap repo {:id tap-id})]
+                                (let [tap-data (edn/read-string (:tap/tap tap))]
+                                  (ok
+                                   (pages/wrap-as-page
+                                    (pages/tap-detail-page
+                                     request
+                                     (assoc tap :tap/data tap-data) drill-path))))
+                                (not-found "Pound Sand"))))
+                    :post (fn [{{:keys [path]} :path-params
+                                :keys          [form-params repo]}]
+                            (let [[tap-id & r] (->> (str/split path #"/")
+                                                    (map (comp edn/read-string codec/url-decode)))]
+                              (if-some [tap (repository/tap repo {:id tap-id})]
+                                (let [drill-path (vec r)
+                                      tap-data (edn/read-string (:tap/tap tap))
+                                      selected (set (mapv edn/read-string (keys form-params)))]
+                                  (ok (html
+                                       (pages/detail-code-block
+                                        (assoc tap :tap/data tap-data)
+                                        drill-path
+                                        selected))))
+                                (not-found "Pound Sand"))))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
                             :keys                  [repo] :as request}]
