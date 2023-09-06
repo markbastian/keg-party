@@ -4,6 +4,7 @@
    [keg-party.commands]
    [keg-party.pages :as pages]
    [keg-party.repository :as repository]
+   [clojure.edn :as edn]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
    [generic.commands :as cmd]
@@ -17,6 +18,7 @@
    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
    [ring.middleware.json :refer [wrap-json-response]]
    [ring.middleware.session.cookie :refer [cookie-store]]
+   [ring.util.codec :as codec]
    [ring.util.http-response :refer [forbidden found not-found ok unauthorized]]))
 
 (defn post-message-handler [{{:strs [authorization]} :headers :keys [repo body] :as request}]
@@ -67,20 +69,20 @@
                        (ok (pages/wrap-as-page
                             (pages/clients-page request))))}]
    ["/favorite" {:post   (fn [{{:keys [username message-id]} :params
-                               :as request}]
+                               :as                           request}]
                            (cmd/dispatch-command
                             request
-                            {:command  :create-favorite-tap
-                             :username username
+                            {:command    :create-favorite-tap
+                             :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id true))))
                  :delete (fn [{{:keys [username message-id]} :params
-                               :as request}]
+                               :as                           request}]
                            (cmd/dispatch-command
                             request
-                            {:command  :delete-favorite-tap
-                             :username username
+                            {:command    :delete-favorite-tap
+                             :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
                            (ok (html (pages/favorite-tap-block username message-id false))))}]
@@ -118,6 +120,33 @@
                            (found "/login")
                            (catch Exception _
                              (found "/signup")))))}]
+   ["/tap/{*path}" {:get  (fn [{{:keys [path]} :path-params
+                                :keys          [repo] :as request}]
+                            (let [[tap-id & r] (->> (str/split path #"/")
+                                                    (map (comp edn/read-string codec/url-decode)))
+                                  drill-path (vec r)]
+                              (if-some [tap (repository/tap repo {:id tap-id})]
+                                (let [tap-data (edn/read-string (:tap/tap tap))]
+                                  (ok
+                                   (pages/wrap-as-page
+                                    (pages/tap-detail-page
+                                     request
+                                     (assoc tap :tap/data tap-data) drill-path))))
+                                (not-found "Pound Sand"))))
+                    :post (fn [{{:keys [path]} :path-params
+                                :keys          [form-params repo]}]
+                            (let [[tap-id & r] (->> (str/split path #"/")
+                                                    (map (comp edn/read-string codec/url-decode)))]
+                              (if-some [tap (repository/tap repo {:id tap-id})]
+                                (let [drill-path (vec r)
+                                      tap-data (edn/read-string (:tap/tap tap))
+                                      selected (set (mapv edn/read-string (keys form-params)))]
+                                  (ok (html
+                                       (pages/detail-code-block
+                                        (assoc tap :tap/data tap-data)
+                                        drill-path
+                                        selected))))
+                                (not-found "Pound Sand"))))}]
    ["/tap_page" {:get (fn [{{:keys [username]}     :session
                             {:keys [limit cursor]} :params
                             :keys                  [repo] :as request}]
