@@ -138,6 +138,8 @@ Architecture & Tech debt:
   - Why?
   - If you go to `/login` it gets fine. It should redirect and, in fact, does later on.
 - [ ] Refactor repository signatures to always take a partial object map of tap, user, etc.
+- [ ] Put pages into a package with one page per actual page
+- [ ] Clean up inline js fragments and maybe put them in an actual js file.
 
 Bugs:
 - [X] 3 starred taps, then add like 20 unstarred taps. Delete the unstarred taps.

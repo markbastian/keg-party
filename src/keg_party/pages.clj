@@ -244,7 +244,20 @@
         hljs-code-id (format "tap-detail-%s" tap-id)
         drill-url    (format "/tap/%s" tap-id)]
     (cond
-      (map? drilled-data)
+      (indexed? drilled-data)
+      [:div.card-body.d-flex.justify-content-center
+       [:div.dropdown
+        [:button.btn.btn-secondary.dropdown-toggle.btn-sm.mx-auto
+         {:type           "button"
+          :data-bs-toggle "dropdown"}
+         "Select Row"]
+        [:ul.dropdown-menu
+         (for [idx (range (count drilled-data))]
+           [:li
+            [:a.dropdown-item
+             {:href (build-drill-url drill-url (conj path idx))}
+             idx]])]]]
+      (associative? drilled-data)
       (let [data-keys (sort (keys drilled-data))]
         [:div.card-body
          [:form
@@ -261,20 +274,7 @@
              [:label
               [:a
                {:href (build-drill-url drill-url (conj path data-key))}
-               (str data-key)]]])]])
-      (vector? drilled-data)
-      [:div.card-body.d-flex.justify-content-center
-       [:div.dropdown
-        [:button.btn.btn-secondary.dropdown-toggle.btn-sm.mx-auto
-         {:type           "button"
-          :data-bs-toggle "dropdown"}
-         "Select Row"]
-        [:ul.dropdown-menu
-         (for [idx (range (count drilled-data))]
-           [:li
-            [:a.dropdown-item
-             {:href (build-drill-url drill-url (conj path idx))}
-             idx]])]]])))
+               (str data-key)]]])]]))))
 
 (defn breadcrumbs [{tap-id :tap/id} drill-path]
   (let [drill-url (format "/tap/%s" tap-id)]
@@ -317,15 +317,23 @@
    (details-navbar request)
    (breadcrumbs tap drill-path)
    (let [code-block (detail-code-block tap drill-path nil)]
-     (if-some [form (data-subselect-form tap drill-path)]
-       [:div.row.p-2
-        [:div.col-sm-2
-         [:div.card
-          form]]
-        [:div.col-sm-10
-         [:div.overflow-auto
-          code-block]]]
-       code-block))])
+     [:div.d-flex.flex-row
+      (when-some [form (data-subselect-form tap drill-path)]
+        [:div.card.p-2 form])
+      [:div.overflow-auto.flex-grow-1.p-2
+       code-block]
+      [:div.justify-content-end.p-2
+       [:button.btn.btn-dark.btn-sm
+        {:onclick (format
+                   "let text = document.getElementById('%s').textContent;
+                    navigator.clipboard.writeText(text);
+                    showToast('%s');"
+                   (format "tap-detail-%s" (:tap/id tap))
+                   "tap-detail-copy-toast-id")}
+        [:i.fa-solid.fa-copy]]
+       [:div.position-fixed.bottom-0.end-0.p-3.w-25
+        [:div.toast {:id "tap-detail-copy-toast-id" :role "alert"}
+         [:div.toast-body "Copied!"]]]]])])
 
 (defn wrap-as-page [content]
   (html5
