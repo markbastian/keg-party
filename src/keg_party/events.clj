@@ -1,6 +1,6 @@
 (ns keg-party.events
   (:require
-   [keg-party.pages :as pages]
+   [keg-party.pages.feed :as feed]
    [generic.client-api :as client-api]
    [hiccup.core :refer [html]]))
 
@@ -20,9 +20,9 @@
   {:pre [username message-id message]}
   (let [clients (client-api/clients client-manager username)
         html    (html
-                 (pages/notifications-pane
+                 (feed/notifications-pane
                   {:hx-swap-oob "afterbegin"}
-                  (pages/code-block context username message-id message)))]
+                  (feed/code-block context username message-id message)))]
     (client-api/broadcast! clients html)))
 
 (defn delete-tap-message! [{:keys [client-manager]} message-id]
@@ -44,22 +44,22 @@
 (defn bulk-reset-tap-messages! [{:keys [client-manager] :as context} {:keys [username]}]
   (let [clients (client-api/clients client-manager username)
         html    (html
-                 (pages/notifications-pane
+                 (feed/notifications-pane
                   {:hx-swap-oob "true"}
-                  (pages/recent-taps context)))]
+                  (feed/recent-taps context)))]
     (client-api/broadcast! clients html)))
 
 (defn create-favorite-tap-message! [{:keys [client-manager]}
                                     {:keys [username tap-id]}]
   (let [clients (client-api/clients client-manager username)
         htmx    (html
-                 (pages/favorite-star username tap-id {:hx-swap-oob "true"
-                                                       :style       "color:#FFD700;"}))]
+                 (feed/favorite-star username tap-id {:hx-swap-oob "true"
+                                                      :style       "color:#FFD700;"}))]
     (client-api/broadcast! clients htmx)))
 
 (defn delete-favorite-tap-message! [{:keys [client-manager]}
                                     {:keys [username tap-id]}]
   (let [clients (client-api/clients client-manager username)
         htmx    (html
-                 (pages/favorite-star username tap-id {:hx-swap-oob "true"}))]
+                 (feed/favorite-star username tap-id {:hx-swap-oob "true"}))]
     (client-api/broadcast! clients htmx)))

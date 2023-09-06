@@ -3,6 +3,8 @@
    [keg-party.auth :as auth]
    [keg-party.commands]
    [keg-party.pages :as pages]
+   [keg-party.pages.detail :as detail]
+   [keg-party.pages.feed :as feed]
    [keg-party.repository :as repository]
    [clojure.edn :as edn]
    [clojure.string :as str]
@@ -40,7 +42,7 @@
 (defn show-expand-collapse-handler [{:keys [params]}]
   (let [{:keys [show-collapse target-id]} params]
     (ok (html
-         (pages/expand-collapse-block
+         (feed/expand-collapse-block
           (parse-boolean show-collapse)
           target-id)))))
 
@@ -66,8 +68,7 @@
          :post post-message-handler}]
    ["/collapse" {:post show-expand-collapse-handler}]
    ["/clients" {:get (fn [request]
-                       (ok (pages/wrap-as-page
-                            (pages/clients-page request))))}]
+                       (ok (pages/clients-page request)))}]
    ["/favorite" {:post   (fn [{{:keys [username message-id]} :params
                                :as                           request}]
                            (cmd/dispatch-command
@@ -76,7 +77,7 @@
                              :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
-                           (ok (html (pages/favorite-tap-block username message-id true))))
+                           (ok (html (feed/favorite-tap-block username message-id true))))
                  :delete (fn [{{:keys [username message-id]} :params
                                :as                           request}]
                            (cmd/dispatch-command
@@ -85,13 +86,11 @@
                              :username   username
                              :message-id message-id})
                            ;; Push an optimistic UI update.
-                           (ok (html (pages/favorite-tap-block username message-id false))))}]
+                           (ok (html (feed/favorite-tap-block username message-id false))))}]
    ["/feed" {:get (fn [request]
-                    (ok (pages/wrap-as-page
-                         (pages/feed-page request))))}]
+                    (ok (pages/feed-page request)))}]
    ["/login" {:get  (fn [request]
-                      (ok (pages/wrap-as-page
-                           (pages/login-page request))))
+                      (ok (pages/login-page request)))
               :post (fn [{{:keys [username password]} :params :keys [repo]}]
                       (if-some [user (repository/user repo {:username username})]
                         (if (auth/check-password (:user/password user) password)
@@ -105,8 +104,7 @@
                       (-> (found "/login")
                           (dissoc :session)))}]
    ["/signup" {:get  (fn [request]
-                       (ok (pages/wrap-as-page
-                            (pages/signup-page request))))
+                       (ok (pages/signup-page request)))
                :post (fn [{{:keys [username email password]} :params
                            :keys                             [repo]}]
                        (if (repository/user repo {:email email :username username})
@@ -128,10 +126,10 @@
                               (if-some [tap (repository/tap repo {:id tap-id})]
                                 (let [tap-data (edn/read-string (:tap/tap tap))]
                                   (ok
-                                   (pages/wrap-as-page
-                                    (pages/tap-detail-page
-                                     request
-                                     (assoc tap :tap/data tap-data) drill-path))))
+                                   (pages/tap-detail-page
+                                    request
+                                    (assoc tap :tap/data tap-data)
+                                    drill-path)))
                                 (not-found "Pound Sand"))))
                     :post (fn [{{:keys [path]} :path-params
                                 :keys          [form-params repo]}]
@@ -142,7 +140,7 @@
                                       tap-data (edn/read-string (:tap/tap tap))
                                       selected (set (mapv edn/read-string (keys form-params)))]
                                   (ok (html
-                                       (pages/detail-code-block
+                                       (detail/detail-code-block
                                         (assoc tap :tap/data tap-data)
                                         drill-path
                                         selected))))
@@ -156,7 +154,7 @@
                                 tap-count   (dec (count recent-taps))]
                             (map-indexed
                              (fn [idx {:tap/keys [tap id]}]
-                               (pages/code-block
+                               (feed/code-block
                                 request username id tap (= idx tap-count)))
                              recent-taps)))))}]
    gweb/route
