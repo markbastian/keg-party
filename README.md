@@ -12,7 +12,7 @@ Start your party by launching a server with one of the following options:
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "36f920537a94bc81d9c3a5dd5f1d66ccb49fd206"}}}' \
+                  :sha     "b2c1a4ce9a90ce612d188de668220cdfc22e9cfb"}}}' \
                    -X keg-party.main/run
 ```
 
@@ -51,7 +51,7 @@ Add `keg-party` as a dependency to your project. The suggested way is to add it 
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         com.markbastian/keg-party
         {:git/url "https://github.com/markbastian/keg-party"
-         :sha     "39a6413a43259ab8fa3350a7c2eac7c8b44152b8"}}
+         :sha     "b2c1a4ce9a90ce612d188de668220cdfc22e9cfb"}}
 ```
 
 Configure your environment with the following environment variables:
