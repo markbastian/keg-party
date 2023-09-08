@@ -12,7 +12,7 @@ Start your party by launching a server with one of the following options:
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "39a6413a43259ab8fa3350a7c2eac7c8b44152b8"}}}' \
+                  :sha     "36f920537a94bc81d9c3a5dd5f1d66ccb49fd206"}}}' \
                    -X keg-party.main/run
 ```
 
@@ -151,7 +151,7 @@ Bugs:
   - Probably just a full swap since this is so destructive (Yep)
     - Instead of nuking the unstarred on the FE just reload with 10 starred
 - [ ] Drilling down to non-parseable entities blows up
-- [ ] Figure out how to serve resources with clj -X execution
+- [X] Figure out how to serve resources with clj -X execution
 
 Client QoL:
 - [ ] Add args for deps so we can easily launch with -X args
