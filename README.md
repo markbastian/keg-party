@@ -116,6 +116,9 @@ Features:
 - [ ] Collaborative tap comments
 - [ ] Drill-down/explore individual tap data
 - [ ] When you sign up, show a page with a hint (copyable code?) for how to setup your tap target
+- [ ] Push client code to clojars
+  - Maybe make a separate repo
+- [ ] Can I inject the client via a [java agent](https://dgopstein.github.io/articles/clojure-javaagent/)?
 
 Architecture & Tech debt:
 - [X] Create protocols for db ops to hide implementation (e.g. users and taps)
@@ -148,6 +151,7 @@ Bugs:
   - Probably just a full swap since this is so destructive (Yep)
     - Instead of nuking the unstarred on the FE just reload with 10 starred
 - [ ] Drilling down to non-parseable entities blows up
+- [ ] Figure out how to serve resources with clj -X execution
 
 Client QoL:
 - [ ] Add args for deps so we can easily launch with -X args
