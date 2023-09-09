@@ -9,17 +9,20 @@
 Start your party by launching a server with one of the following options:
 
 #### The super easy way
+
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "fc685beb68bfca9d36ad7c5520e3d0d8782becd8"}}}' \
+                  :sha     "32ed6cf053a1ab815ee21db3388d492805a242f8"}}}' \
                    -X keg-party.main/run
 ```
 
 #### Other ways
 
 - `clj -X keg-party.main/run` from the cloned project
-- Build an uberjar with `clj -T:build uber` then run it with `java -jar target/keg-party-${LATEST_VERSION}-standalone.jar`
+- Uberjar:
+  - Build with `clj -T:build server-uberjar`
+  - Run with `java -jar target/keg-party-${LATEST_VERSION}-standalone.jar`
 
 By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the
 configuration section below.
@@ -42,17 +45,9 @@ Start playing around and have some fun!
 
 ### Connect your client
 
-Invite all your friends to the party by doing the following:
+Invite all your friends to the party by adding `keg-party-client.jar` as a dependency to your project.
 
-Add `keg-party` as a dependency to your project. The suggested way is to add it to your `~/.clojure/deps.edn` file
-  like so:
-
-```clojure
- :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        com.markbastian/keg-party
-        {:git/url "https://github.com/markbastian/keg-party"
-         :sha     "fc685beb68bfca9d36ad7c5520e3d0d8782becd8"}}
-```
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.markbastian/keg-party-client.svg)](https://clojars.org/com.github.markbastian/keg-party-client)
 
 Configure your environment with the following environment variables:
 - `KEG_PARTY_HOST`, defaults to http://localhost
@@ -61,7 +56,8 @@ Configure your environment with the following environment variables:
 - `KEG_PARTY_PASSWORD`, no default. This is your password from the setup page.
   - This is the only env var that you _must_ set if you aren't using the defaults.
 
-Connect the tap target by invoking:
+Once you've added the client jar and configured the environment, connect the tap target by invoking:
+
 ```clojure
 (do
   (require '[keg-party.clients.rest-client :as kprc])
