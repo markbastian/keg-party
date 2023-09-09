@@ -21,7 +21,7 @@ clojure -Sdeps '{:deps {com.github.markbastian/keg-party
 
 - `clj -X keg-party.main/run` from the cloned project
 - Uberjar:
-  - Build with `clj -T:build uber`
+  - Build with `clj -T:build server-uberjar`
   - Run with `java -jar target/keg-party-${LATEST_VERSION}-standalone.jar`
 
 By default, the server will run at `http://localhost:3333`. You can change these defaults as described in the

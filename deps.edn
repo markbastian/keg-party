@@ -45,21 +45,18 @@
                 {:git/url "https://github.com/cognitect-labs/test-runner"
                  :sha     "2d69f33d7980c3353b246c28f72ffeafbd9f2fab"}}
    :exec-fn    cognitect.test-runner.api/test}
-  ;; clj -T:build-client jar && clj -T:install-client
+  ;; clj -T:build client-jar && clj -T:install-client
   :install-client {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :local
                                   :artifact  "target/keg-party-client.jar"}}
-  ;; clj -T:build-client jar && clj CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
+  ;; clj -T:build client-jar && clj CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
   :deploy-client  {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :remote
                                   :artifact  "target/keg-party-client.jar"}}
-  ;; clj -T:build uber
+  ;; `clj -T:build server-uberjar` for the server uberjar
+  ;; `clj -T:build client-jar` for the client jar
   :build          {:paths      ["build"]
                    :deps       {io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}
-                   :ns-default build}
-  ;; clj -T:build-client jar
-  :build-client   {:paths      ["build"]
-                   :deps       {io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}
-                   :ns-default buildclient}}}
+                   :ns-default build}}}
