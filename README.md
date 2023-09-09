@@ -9,10 +9,11 @@
 Start your party by launching a server with one of the following options:
 
 #### The super easy way
+
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "984d8db1d0f0f3e80154dd6775ccfd0a6b740229"}}}' \
+                  :sha     "4994638247578358bb4652e33758d2cad55fe9e8"}}}' \
                    -X:server keg-party.main/run
 ```
 
