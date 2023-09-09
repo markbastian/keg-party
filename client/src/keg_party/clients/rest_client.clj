@@ -3,8 +3,12 @@
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]]
-            [generic.utils :as u]
-            [hato.client :as hc]))
+            [hato.client :as hc])
+  (:import (java.util Base64)))
+
+(defn base64-encode [s]
+  (let [s (if (string? s) s (pr-str s))]
+    (.encodeToString (Base64/getEncoder) (.getBytes s))))
 
 (defn post-tap-data
   ([{:keys [username password]
@@ -15,7 +19,7 @@
    (let [host    (env :keg-party-host "http://localhost")
          port    (env :keg-party-port "3333")
          url     (cond-> host port (str ":" port))
-         body    (u/base64-encode (with-out-str (pp/pprint data)))
+         body    (base64-encode (with-out-str (pp/pprint data)))
          request {:url              url
                   :method           :post
                   :body             body

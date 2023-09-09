@@ -13,7 +13,7 @@ Start your party by launching a server with one of the following options:
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
                   :sha     "fc685beb68bfca9d36ad7c5520e3d0d8782becd8"}}}' \
-                   -X keg-party.main/run
+                   -X:server keg-party.main/run
 ```
 
 #### Other ways
@@ -53,6 +53,8 @@ Add `keg-party` as a dependency to your project. The suggested way is to add it 
         {:git/url "https://github.com/markbastian/keg-party"
          :sha     "fc685beb68bfca9d36ad7c5520e3d0d8782becd8"}}
 ```
+
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.markbastian/keg-party-client.svg)](https://clojars.org/com.github.markbastian/keg-party-client)
 
 Configure your environment with the following environment variables:
 - `KEG_PARTY_HOST`, defaults to http://localhost

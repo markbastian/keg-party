@@ -1,7 +1,8 @@
 (ns keg-party.auth
-  (:require [buddy.core.codecs :as codecs]
-            [buddy.core.hash :as hash]
-            [clojure.string :as str]))
+  (:require
+   [buddy.core.codecs :as codecs]
+   [buddy.core.hash :as hash]
+   [clojure.string :as str]))
 
 (defn hash-and-salt [password salt]
   (->> (codecs/->bytes password)
