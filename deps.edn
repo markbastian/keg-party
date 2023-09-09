@@ -30,25 +30,12 @@
                 {:git/url "https://github.com/cognitect-labs/test-runner"
                  :sha     "2d69f33d7980c3353b246c28f72ffeafbd9f2fab"}}
    :exec-fn    cognitect.test-runner.api/test}
-  :jar     {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
-            :exec-fn      hf.depstar/jar
-            :exec-args    {:jar "keg-party.jar" :sync-pom true}}
-  :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
-            :exec-fn      hf.depstar/uberjar
-            :exec-args    {:aot        true
-                           :jar        "keg-party.jar"
-                           :main-class "keg-party.main"
-                           :sync-pom   true}}
   :install {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
             :exec-fn      deps-deploy.deps-deploy/deploy
             :exec-args    {:installer :local :artifact "keg-party.jar"}}
   :deploy  {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
             :exec-fn      deps-deploy.deps-deploy/deploy
             :exec-args    {:installer :remote :artifact "keg-party.jar"}}
-  :tap-in  {;:exec-fn   keg-party.clients.rest-client/foo
-            :main-opts ["-m" "keg-party.clients.rest-client"]}
-  ;; Not ready yet
-  ;:tap-in  {:exec-fn   keg-party.clients.rest-client/tap-launcher
-  ;          :exec-args {:host "http://localhost"
-  ;                      :port 3000}}
-  }}
+  :build {:paths ["build"]
+          :deps {io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}
+          :ns-default build}}}
