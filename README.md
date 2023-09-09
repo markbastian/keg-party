@@ -13,7 +13,7 @@ Start your party by launching a server with one of the following options:
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "32ed6cf053a1ab815ee21db3388d492805a242f8"}}}' \
+                  :sha     "a2dc19afa69fda9c9bc996cae8356cace0558e2d"}}}' \
                    -X keg-party.main/run
 ```
 
