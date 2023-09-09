@@ -13,13 +13,13 @@ Start your party by launching a server with one of the following options:
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "4994638247578358bb4652e33758d2cad55fe9e8"}}}' \
-                   -X:server keg-party.main/run
+                  :sha     "fc685beb68bfca9d36ad7c5520e3d0d8782becd8"}}}' \
+                   -X keg-party.main/run
 ```
 
 #### Other ways
 
-- `clj -X:server keg-party.main/run` from the cloned project
+- `clj -X keg-party.main/run` from the cloned project
 - Uberjar:
   - Build with `clj -T:build uber`
   - Run with `java -jar target/keg-party-${LATEST_VERSION}-standalone.jar`
