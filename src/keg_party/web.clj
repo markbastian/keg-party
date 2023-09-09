@@ -158,7 +158,9 @@
                                 request username id tap (= idx tap-count)))
                              recent-taps)))))}]
    gweb/route
-   ["/public/*" (ring/create-resource-handler {:root "resources"})]])
+   ["/public/*" (ring/create-resource-handler {:root "public"})]
+   ;["/public/*" (ring/create-file-handler {:root "resources/public"})]
+   ])
 
 (def handler
   (ring/ring-handler
