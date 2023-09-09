@@ -1,5 +1,7 @@
 ;; https://github.com/practicalli/clojure-deps-edn
-{:aliases
+{:paths []
+ :deps  []
+ :aliases
  {:server         {:extra-paths ["src" "resources"]
                    :extra-deps  {buddy/buddy-core                  {:mvn/version "1.11.423"}
                                  ch.qos.logback/logback-classic    {:mvn/version "1.4.11"}
@@ -38,7 +40,7 @@
   :install-client {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :local
-                                  :artifact "target/keg-party-client.jar"}}
+                                  :artifact  "target/keg-party-client.jar"}}
   ;; clj -T:build-client jar && clj CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
   :deploy-client  {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
