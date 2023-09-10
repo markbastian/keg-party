@@ -7,7 +7,7 @@
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "a2dc19afa69fda9c9bc996cae8356cace0558e2d"}}}' \
+                  :sha     "3c653a660f87530795fab5ce6e77b6e431eb14dd"}}}' \
                    -X keg-party.main/run
 ```
 
@@ -30,7 +30,7 @@ Here's how you might add this alias to your `~/.clojure/deps.edn` file:
   {:extra-deps
    {'com.github.markbastian/keg-party
     {:git/url "https://github.com/markbastian/keg-party"
-     :sha     "a2dc19afa69fda9c9bc996cae8356cace0558e2d"}}}}}
+     :sha     "3c653a660f87530795fab5ce6e77b6e431eb14dd"}}}}}
 ```
 
 ### Method 3: Run the -X target from the project
