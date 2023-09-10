@@ -2,9 +2,9 @@
 
 (defn signup-page [& attributes]
   [:div (into
-         {:id    "app"
-          :style "position:absolute; top:20%; right:0; left:0;"}
-         attributes)
+          {:id    "app"
+           :style "position:absolute; top:20%; right:0; left:0;"}
+          attributes)
    [:form.container.border.rounded
     {:action "/signup" :method :post}
     [:div.form-group.mb-2
@@ -22,11 +22,24 @@
        :autocomplete "off"}]
      [:label "Password"]
      [:input.form-control
-      {:name         "password"
+      {:id           "enter-password"
+       :name         "password"
        :type         "password"
        :placeholder  "Enter a really great password"
-       :autocomplete "off"}]]
-    [:div.d-grid.gap-2
+       :autocomplete "off"
+       :onkeyup "checkSamePassword()"}]
+     [:label "Confirm password"]
+     [:input.form-control
+      {:id           "confirm-password"
+       :name         "confirm-password"
+       :type         "password"
+       :placeholder  "Re-enter that same password"
+       :autocomplete "off"
+       :onkeyup "checkSamePassword()"}]
+     [:label {:id "message"}]]
+    [:div.d-grid.gap-2.p-2
      [:button.btn.btn-primary.btn-dark
-      {:type "submit"}
+      {:id "password-submit-button"
+       :disabled true
+       :type "submit"}
       "Sign up"]]]])

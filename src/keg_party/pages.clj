@@ -23,7 +23,7 @@
      "https://unpkg.com/htmx.org/dist/ext/ws.js"
      "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
      "public/keg_party/highlight.min.js"
-     "public/keg_party/showtoast.js")
+     "public/keg_party/keg-party.js")
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]]
    content))
 
