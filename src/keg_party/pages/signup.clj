@@ -1,10 +1,8 @@
 (ns keg-party.pages.signup)
 
-(defn signup-page [& attributes]
-  [:div (into
-          {:id    "app"
-           :style "position:absolute; top:20%; right:0; left:0;"}
-          attributes)
+(defn signup-page [_request]
+  [:div {:id    "app"
+         :style "position:absolute; top:20%; right:0; left:0;"}
    [:form.container.border.rounded
     {:action "/signup" :method :post}
     [:div.form-group.mb-2

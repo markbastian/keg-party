@@ -23,7 +23,8 @@
    [ring.util.codec :as codec]
    [ring.util.http-response :refer [forbidden found not-found ok unauthorized]]))
 
-(defn post-message-handler [{{:strs [authorization]} :headers :keys [repo body] :as request}]
+(defn post-message-handler [{{:strs [authorization]} :headers
+                             :keys                   [repo body] :as request}]
   (log/info "Posting message")
   (let [[_ tok] (str/split authorization #" ")
         [username password] (str/split (u/base64-decode tok) #":")]
@@ -60,7 +61,9 @@
             username
             (basic-auth request))
       (handler request)
-      (found "/login"))))
+      (do
+        (log/info "Redirecting to /login")
+        (found "/login")))))
 
 (def routes
   [["/" {:get  (fn [_request]
@@ -102,7 +105,8 @@
                         (unauthorized "Pound sand")))}]
    ["/logout" {:get (fn [_request]
                       (-> (found "/login")
-                          (dissoc :session)))}]
+                          (assoc :session nil)))}]
+   ;["/select_user" {:post select-user-handler}]
    ["/signup" {:get  (fn [request]
                        (ok (pages/signup-page request)))
                :post (fn [{{:keys [username email password]} :params
@@ -110,11 +114,13 @@
                        (if (repository/user repo {:email email :username username})
                          (found "/login")
                          (try
-                           (repository/create-user!
-                            repo
-                            {:username username
-                             :email    email
-                             :password (auth/hash-password password)})
+                           (let [channel-id (:channel/id (repository/create-channel! repo {:name "public"}))]
+                             (repository/create-user!
+                              repo
+                              {:username   username
+                               :email      email
+                               :channel_id channel-id
+                               :password   (auth/hash-password password)}))
                            (found "/login")
                            (catch Exception _
                              (found "/signup")))))}]
@@ -137,26 +143,16 @@
                                                     (map (comp edn/read-string codec/url-decode)))]
                               (if-some [tap (repository/tap repo {:id tap-id})]
                                 (let [drill-path (vec r)
-                                      tap-data (edn/read-string (:tap/tap tap))
-                                      selected (set (mapv edn/read-string (keys form-params)))]
+                                      tap-data   (edn/read-string (:tap/tap tap))
+                                      selected   (set (mapv edn/read-string (keys form-params)))]
                                   (ok (html
                                        (detail/detail-code-block
                                         (assoc tap :tap/data tap-data)
                                         drill-path
                                         selected))))
                                 (not-found "Pound Sand"))))}]
-   ["/tap_page" {:get (fn [{{:keys [username]}     :session
-                            {:keys [limit cursor]} :params
-                            :keys                  [repo] :as request}]
-                        (ok
-                         (html
-                          (let [recent-taps (repository/get-recent-taps repo username limit cursor)
-                                tap-count   (dec (count recent-taps))]
-                            (map-indexed
-                             (fn [idx {:tap/keys [tap id]}]
-                               (feed/code-block
-                                request username id tap (= idx tap-count)))
-                             recent-taps)))))}]
+   ["/tap_page" {:get (fn [request]
+                        (ok (html (feed/recent-taps request))))}]
    gweb/route
    ["/public/*" (ring/create-resource-handler {:root "public"})]
    ;["/public/*" (ring/create-file-handler {:root "resources/public"})]
@@ -180,6 +176,16 @@
                          muuntaja/format-request-middleware
                          coercion/coerce-response-middleware
                          coercion/coerce-request-middleware
-                         [wrap-auth #{"/signup" "/login" "/logout"}]]}})
+                         [wrap-auth #{"/signup"
+                                      "/login"
+                                      "/logout"
+                                      "/public/keg_party/css/bootstrap/5.2.3/bootstrap.min.css"
+                                      "/public/keg_party/css/highlight.js/11.7.0/styles/intellij-light.min.css"
+                                      "/public/keg_party/css/keg-party.css"
+                                      "/public/keg_party/js/htmx/1.9.5/htmx.min.js"
+                                      "/public/keg_party/js/htmx/1.9.5/ext/ws.js"
+                                      "/public/keg_party/js/bootstrap/5.2.3/bootstrap.bundle.min.js"
+                                      "/public/keg_party/js/highlight.js/highlight.min.js"
+                                      "/public/keg_party/js/keg-party.js"}]]}})
     ;(ring/create-file-handler {:path "/resources/"})
    (constantly (not-found "Not found"))))

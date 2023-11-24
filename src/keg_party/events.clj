@@ -1,6 +1,8 @@
 (ns keg-party.events
   (:require
    [keg-party.pages.feed :as feed]
+   [keg-party.pages.sidebar :as sidebar]
+   [keg-party.repository :as repository]
    [generic.client-api :as client-api]
    [hiccup.core :refer [html]]))
 
@@ -15,15 +17,20 @@
 ;; In some fancy world we could have some polymorphic dispatch on client protocol
 ;; (ws, http, etc.) and format (e.g. htmx, json, etc.) but for now let's keep it nice and simple.
 
-(defn create-tap-message! [{:keys [client-manager] :as context}
-                           {:keys [username message-id message]}]
-  {:pre [username message-id message]}
-  (let [clients (client-api/clients client-manager username)
-        html    (html
-                 (feed/notifications-pane
-                  {:hx-swap-oob "afterbegin"}
-                  (feed/code-block context username message-id message)))]
-    (client-api/broadcast! clients html)))
+(defn create-tap-message!
+  [{:keys [client-manager repo] :as context}
+   {tap-id       :tap/id
+    tap-contents :tap/tap
+    user-id      :tap/user_id
+    channel-id   :tap/channel_id}]
+  (let [{:user/keys [username]} (repository/user repo {:id user-id})
+        html (html
+              (feed/notifications-pane
+               {:hx-swap-oob "afterbegin"}
+               (feed/code-block context username tap-id tap-contents)))]
+    (doseq [{:user/keys [username]} (repository/get-channel-users repo {:id channel-id})
+            :let [clients (client-api/clients client-manager username)]]
+      (client-api/broadcast! clients html))))
 
 (defn delete-tap-message! [{:keys [client-manager]} message-id]
   (let [clients (client-api/clients client-manager)
@@ -62,4 +69,14 @@
   (let [clients (client-api/clients client-manager username)
         htmx    (html
                  (feed/favorite-star username tap-id {:hx-swap-oob "true"}))]
+    (client-api/broadcast! clients htmx)))
+
+(defn update-channels-list-message!
+  "Update the channels list (including users) in the DOM. This is pretty coarse."
+  [{:keys [client-manager] :as context} _msg]
+  (let [clients (client-api/clients client-manager)
+        htmx    (html
+                 (sidebar/channels-list
+                  context
+                  {:hx-swap-oob "true"}))]
     (client-api/broadcast! clients htmx)))

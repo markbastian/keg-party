@@ -10,6 +10,7 @@
          hiccup/hiccup                     {:mvn/version "1.0.5"}
          info.sunng/ring-jetty9-adapter    {:mvn/version "0.22.1"}
          integrant/integrant               {:mvn/version "0.8.1"}
+         me.flowthing/pp                   {:mvn/version "2023-10-05.5"}
          metosin/jsonista                  {:mvn/version "0.3.7"}
          metosin/malli                     {:mvn/version "0.11.0"}
          metosin/reitit                    {:mvn/version "0.6.0"}
@@ -28,9 +29,9 @@
   :keg-party/dev  {:extra-paths ["build"
                                  "client/src"
                                  "dev"]
-                   :extra-deps  {environ/environ           {:mvn/version "1.2.0"}
-                                 hato/hato                 {:mvn/version "0.9.0"}
-                                 org.clojure/tools.logging {:mvn/version "1.2.4"}
+                   :extra-deps  {environ/environ               {:mvn/version "1.2.0"}
+                                 hato/hato                     {:mvn/version "0.9.0"}
+                                 org.clojure/tools.logging     {:mvn/version "1.2.4"}
                                  io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}}
   ;; Override the paths and deps. Use this profile for building the client jar since it excludes all the extra jars only
   ;; needed by the server or if you want to just run the client code only in a REPL.

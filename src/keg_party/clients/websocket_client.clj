@@ -14,7 +14,7 @@
                                          (println "WebSocket closed!"))})]
     (ws/send! ws (u/to-json-str
                   {:command    "tap-message"
-                   :client-id  (env :user)
+                   :session-id  (env :user)
                    :message-id (nano-id 10)
                    :message    (str "TIME: " (Date.))}))
     (Thread/sleep 1000)
