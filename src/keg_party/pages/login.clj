@@ -1,10 +1,8 @@
 (ns keg-party.pages.login)
 
-(defn login-page [& attributes]
-  [:div (into
-         {:id    "app"
-          :style "position:absolute; top:20%; right:0; left:0;"}
-         attributes)
+(defn login-page [_request]
+  [:div {:id    "app"
+         :style "position:absolute; top:20%; right:0; left:0;"}
    [:form.container.border.rounded
     {:action "/login" :method :post}
     [:div.form-group.mb-2

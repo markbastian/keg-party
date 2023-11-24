@@ -13,17 +13,17 @@
    [:head
     [:base {:href "/"}]
     (include-css
-     "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+     "public/keg_party/css/bootstrap/5.2.3/bootstrap.min.css"
      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-     "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/intellij-light.min.css"
-       ;"//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"
-     )
+     ;"public/keg_party/css/font-awesome/6.2.1/all.min.css"
+     "public/keg_party/css/highlight.js/11.7.0/styles/intellij-light.min.css"
+     "public/keg_party/css/keg-party.css")
     (include-js
-     "https://unpkg.com/htmx.org@1.8.4"
-     "https://unpkg.com/htmx.org/dist/ext/ws.js"
-     "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-     "public/keg_party/highlight.min.js"
-     "public/keg_party/keg-party.js")
+     "public/keg_party/js/htmx/1.9.5/htmx.min.js"
+     "public/keg_party/js/htmx/1.9.5/ext/ws.js"
+     "public/keg_party/js/bootstrap/5.2.3/bootstrap.bundle.min.js"
+     "public/keg_party/js/highlight.js/highlight.min.js"
+     "public/keg_party/js/keg-party.js")
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]]
    content))
 

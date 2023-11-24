@@ -17,12 +17,17 @@
   (log/debug "Creating repository")
   (sql-repo/instance ds))
 
+(defmethod ig/init-key ::client-manager [_ _]
+  (log/debug "Creating client manager")
+  (client-api/atomic-client-manager))
+
 (def config
   {::jdbc/datasource {:dbtype "sqlite"
                       :dbname "keg-party.db"}
    ::jdbc/migrations {:db         (ig/ref ::jdbc/datasource)
                       :migrations migrations/migrations}
    ::repository      {:ds (ig/ref ::jdbc/datasource)}
+   ::client-manager  {}
    ::ws/ws-handlers  {:on-connect #'ws-handlers/on-connect
                       :on-text    #'ws-handlers/on-text
                       :on-close   #'ws-handlers/on-close
@@ -30,7 +35,7 @@
    ::jetty9/server   {:host           "0.0.0.0"
                       :port           (parse-long (env :keg-party-port "3333"))
                       :join?          false
-                      :client-manager (client-api/atomic-client-manager)
+                      :client-manager (ig/ref ::client-manager)
                       :repo           (ig/ref ::repository)
                       :ws-handlers    (ig/ref ::ws/ws-handlers)
                       :handler        #'web/handler}})
@@ -59,4 +64,8 @@
 
   (let [repo (::repository (system))]
     (repository-api/users repo)
-    (repository-api/user repo {:username "mbastian"})))
+    ;(repository-api/user repo {:username "mbastian"})
+    )
+
+  (let [cm (::client-manager (system))]
+    (client-api/clients cm)))
