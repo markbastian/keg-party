@@ -1,6 +1,7 @@
 (ns keg-party.repository.sql-repository
   (:require
    [keg-party.repository :as repository]
+   [clojure.tools.logging :as log]
    [honey.sql :as hsql]
    [next.jdbc :as jdbc]
    [next.jdbc.result-set :as result-set]
@@ -179,7 +180,28 @@
   (get-channel-users [{:keys [ds] :as this} channel]
     (let [c          (zipmap (map (comp keyword name) (keys channel)) (vals channel))
           channel-id (:channel/id (repository/channel this c))]
-      (sql/find-by-keys ds :user {:channel_id channel-id} {:order-by [:user/username]}))))
+      (sql/find-by-keys ds :user {:channel_id channel-id} {:order-by [:user/username]})))
+  (delete-channel! [{:keys [ds] :as this} channel]
+    (jdbc/with-transaction [tx ds]
+      (let [c (zipmap (map (comp keyword name) (keys channel)) (vals channel))
+            {channel-id :channel/id
+             channel-name :channel/name} (repository/channel this c)]
+        (let [[{:keys [num_users]}] (jdbc/execute!
+                                     tx
+                                     (hsql/format
+                                      {:select    [[[:count :*] :num_users]]
+                                       :from      [[:user :U]]
+                                       :left-join [[:channel :C] [:= :C.id :U.channel_id]]
+                                       :where     [:= :C.id channel-id]}))]
+          (if (zero? num_users)
+            (doto tx
+              (jdbc/execute!
+               (hsql/format
+                {:delete [] :from [:tap] :where [:= :channel_id channel-id]}))
+              (jdbc/execute!
+               (hsql/format
+                {:delete [] :from [:channel] :where [:= :id channel-id] :returning :id})))
+            (log/warnf "Cannot delete empty channel %s" channel-name)))))))
 
 (defn instance [ds]
   (->CommandSqlImpl ds))

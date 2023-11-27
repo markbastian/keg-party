@@ -79,3 +79,9 @@
             (events/bulk-reset-tap-messages! context {:username username}))
           (log/warnf "Unable to create channel %s" channel-name)))
       (log/infof "User %s is already in channel %s" username channel-name))))
+
+(defmethod cmd/dispatch-command :delete-channel
+  [{:keys [repo] :as context} {:keys [command channel-name]}]
+  (log/infof "Dispatching command %s for channel %s" command channel-name)
+  (when (repository/delete-channel! repo {:name channel-name})
+    (events/update-channels-list-message! context nil)))
