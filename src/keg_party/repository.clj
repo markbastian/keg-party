@@ -27,4 +27,5 @@
 (defprotocol IChannelActions
   (set-user-channel! [_ user channel])
   (get-user-channel [_ user])
-  (get-channel-users [_ channel]))
+  (get-channel-users [_ channel])
+  (delete-channel! [_ channel]))
