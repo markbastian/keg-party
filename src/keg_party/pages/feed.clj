@@ -157,7 +157,7 @@
         "Go"]]]]]])
 
 (defn navbar [{:keys [session]}]
-  [:nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.sticky-top
+  [:nav.navbar.navbar-expand-sm.navbar-dark.bg-dark.sticky-top
    [:a.navbar-brand {:href "#"}
     [:img {:src   "public/keg_party/rootbeer-sm.png"
            :width "30" :height "30" :alt ""}]]
@@ -166,23 +166,29 @@
                             :data-bs-target "#navbarText"}
     [:span.navbar-toggler-icon]]
    [:div#navbarText.collapse.navbar-collapse
-    [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
+    [:ul.navbar-nav.mx-auto.mb-2.mb-lg-0
      [:li.nav-item
-      [:a.nav-link.active {:href "/clients"} "Clients"]]
+      [:a.nav-link.active {:href "/clients"
+                           :title "List clients"}
+       [:i.fa-solid.fa-users]]]
      [:li.nav-item
       [:a.nav-link.active
        {:href    "#"
         :ws-send "true"
-        :hx-vals (u/to-json-str {:command :delete-unstarred-taps})}
-       "Delete Unstarred"]]
+        :hx-vals (u/to-json-str {:command :delete-unstarred-taps})
+        :title "Delete unstarred taps"}
+       [:i.fa-solid.fa-trash]]]
      [:li.nav-item
       [:a.nav-link.active
        {:href           "#"
         :data-bs-toggle "modal"
-        :data-bs-target "#changeChannelModal"} "Change Channel"]]
+        :data-bs-target "#changeChannelModal"
+        :title "Create or change channel"}
+       [:i.fa-solid.fa-person-walking]]]
      [:li.nav-item
-      [:a.nav-link {:href "/logout"}
-       (format "Logout %s" (:username session))]]]]])
+      [:a.nav-link {:href "/logout"
+                    :title (format "Logout %s" (:username session))}
+       [:i.fa-solid.fa-right-from-bracket]]]]]])
 
 (defn notifications-pane [& r]
   (into [:div#tap-log.taplog.p-2] r))
