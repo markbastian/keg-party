@@ -1,6 +1,10 @@
 name: Example workflow
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
 
@@ -39,19 +43,42 @@ jobs:
           chmod +x linux-install-1.11.1.1347.sh && \
           ./linux-install-1.11.1.1347.sh
 
+      - name: Install babashka
+        shell: bash
+        run: |
+          curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install && \
+          chmod +x install && \
+          ./install
+
       - name: Build the jar
         run: clojure -T:build server-uberjar
 
       - name: List the results
         shell: bash
-        run: |
-          ls -al target
+        run: ls -al target
+
+      - name: Run the jar
+        run: KEG_PARTY_PORT=3333 java -jar target/keg-party-standalone.jar &
+
 
       - name: Set up the Chrome Driver
         uses: nanasess/setup-chromedriver@v2
+        with:
+          run: |
+            export DISPLAY=:99
+            chromedriver --url-base=/wd/hub &
+            sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
 
-      - name: Set up the Chrome options
+      - name: Start Chrome
         run: |
-          export DISPLAY=:99
-          chromedriver --url-base=/wd/hub &
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+          google-chrome-stable --no-sandbox --disable-gpu --remote-debugging-port=9222 http://localhost &
+
+      - name: Run UI test
+        run: ./bin/etaoin.clj
+
+#      - name: Run automation script
+#        uses: GabrielBB/xvfb-action@v1
+#        with:
+#          run: ./bin/etaoin.clj
+
+# act --container-architecture linux/amd64 -j clojure
