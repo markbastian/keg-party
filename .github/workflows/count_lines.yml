@@ -18,10 +18,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Runs djdefi/cloc-action
       - name: Count Lines of Code (cloc)
-        uses: djdefi/cloc-action@60861648c234129d1fb590a780e2ae9725e6fbbc
+        uses: djdefi/cloc-action@f625aa2dd311b7e6d24e2114e0d90bd5536db3af
         with:
           options: src test
