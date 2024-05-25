@@ -16,6 +16,8 @@
 .hg/
 /.clj-kondo
 /.idea
+/.m2
+/local
 *.iml
 .DS_Store
 pom.xml

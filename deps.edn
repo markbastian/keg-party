@@ -37,6 +37,7 @@
   ;; needed by the server or if you want to just run the client code only in a REPL.
   :client         {:paths ["client/src"]
                    :deps  {environ/environ           {:mvn/version "1.2.0"}
+                           fipp/fipp                 {:mvn/version "0.6.26"}
                            hato/hato                 {:mvn/version "0.9.0"}
                            org.clojure/tools.logging {:mvn/version "1.2.4"}}}
   :test           {:extra-paths ["test"]
