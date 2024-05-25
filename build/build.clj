@@ -9,6 +9,12 @@
 (defn clean [_]
   (b/delete {:path "target"}))
 
+(def pom-template
+  [[:licenses
+    [:license
+     [:name "Eclipse Public License"]
+     [:url "https://www.eclipse.org/legal/epl-v10.html"]]]])
+
 (defn server-uberjar
   "Build the keg-party server executable uberjar. Invoke with `clj -T:build server-uberjar`"
   [_]
@@ -25,6 +31,7 @@
                   :lib       lib
                   :version   version
                   :basis     basis
+                  :pom-data pom-template
                   :src-dirs  ["src"]})
     (b/copy-file
      {:src    (b/pom-path {:class-dir class-dir
@@ -51,6 +58,7 @@
                   :lib       lib
                   :version   version
                   :basis     basis
+                  :pom-data pom-template
                   :src-dirs  ["client/src"]})
     (b/copy-file
      {:src    (b/pom-path {:class-dir class-dir
