@@ -52,7 +52,7 @@
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :local
                                   :artifact  "target/keg-party-client.jar"}}
-  ;; clj -T:build client-jar && clj CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
+  ;; clj -T:build client-jar && CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
   :deploy-client  {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :remote
