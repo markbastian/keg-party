@@ -13,7 +13,10 @@
   [[:licenses
     [:license
      [:name "Eclipse Public License"]
-     [:url "https://www.eclipse.org/legal/epl-v10.html"]]]])
+     [:url "https://www.eclipse.org/legal/epl-v10.html"]]]
+   [:developers
+    [:developer
+     [:name "Mark Bastian"]]]])
 
 (defn server-uberjar
   "Build the keg-party server executable uberjar. Invoke with `clj -T:build server-uberjar`"
