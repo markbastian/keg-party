@@ -1,27 +1,27 @@
 ;; https://github.com/practicalli/clojure-deps-edn
 {:paths ["src" "resources"]
  :deps  {buddy/buddy-core                  {:mvn/version "1.11.423"}
-         ch.qos.logback/logback-classic    {:mvn/version "1.5.6"}
-         com.github.seancorfield/honeysql  {:mvn/version "2.6.1126"}
+         ch.qos.logback/logback-classic    {:mvn/version "1.4.11"}
+         com.github.seancorfield/honeysql  {:mvn/version "2.4.1045"}
          com.github.seancorfield/next.jdbc {:mvn/version "1.3.883"}
-         datascript/datascript             {:mvn/version "1.6.5"}
+         datascript/datascript             {:mvn/version "1.5.2"}
          environ/environ                   {:mvn/version "1.2.0"}
          hato/hato                         {:mvn/version "0.9.0"}
          hiccup/hiccup                     {:mvn/version "1.0.5"}
-         info.sunng/ring-jetty9-adapter    {:mvn/version "0.33.1"}
-         integrant/integrant               {:mvn/version "0.10.0"}
-         me.flowthing/pp                   {:mvn/version "2024-01-04.60"}
-         metosin/jsonista                  {:mvn/version "0.3.8"}
-         metosin/malli                     {:mvn/version "0.16.1"}
-         metosin/reitit                    {:mvn/version "0.7.0"}
+         info.sunng/ring-jetty9-adapter    {:mvn/version "0.22.1"}
+         integrant/integrant               {:mvn/version "0.8.1"}
+         me.flowthing/pp                   {:mvn/version "2023-10-05.5"}
+         metosin/jsonista                  {:mvn/version "0.3.7"}
+         metosin/malli                     {:mvn/version "0.11.0"}
+         metosin/reitit                    {:mvn/version "0.6.0"}
          metosin/ring-http-response        {:mvn/version "0.9.3"}
-         nano-id/nano-id                   {:mvn/version "1.1.0"}
-         org.clojure/clojure               {:mvn/version "1.11.3"}
+         nano-id/nano-id                   {:mvn/version "1.0.0"}
+         org.clojure/clojure               {:mvn/version "1.11.1"}
          org.clojure/core.async            {:mvn/version "1.6.681"}
-         org.clojure/tools.logging         {:mvn/version "1.3.0"}
-         org.xerial/sqlite-jdbc            {:mvn/version "3.45.3.0"}
-         ring/ring                         {:mvn/version "1.12.1"}
-         ring/ring-defaults                {:mvn/version "0.5.0"}
+         org.clojure/tools.logging         {:mvn/version "1.2.4"}
+         org.xerial/sqlite-jdbc            {:mvn/version "3.42.0.0"}
+         ring/ring                         {:mvn/version "1.10.0"}
+         ring/ring-defaults                {:mvn/version "0.3.4"}
          ring/ring-json                    {:mvn/version "0.5.1"}}
  :aliases
  {;; Add in the various directories that normally replace paths and deps as
@@ -31,34 +31,34 @@
                                  "dev"]
                    :extra-deps  {environ/environ               {:mvn/version "1.2.0"}
                                  hato/hato                     {:mvn/version "0.9.0"}
-                                 org.clojure/tools.logging     {:mvn/version "1.3.0"}
-                                 io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}}
+                                 org.clojure/tools.logging     {:mvn/version "1.2.4"}
+                                 io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}}
   ;; Override the paths and deps. Use this profile for building the client jar since it excludes all the extra jars only
   ;; needed by the server or if you want to just run the client code only in a REPL.
   :client         {:paths ["client/src"]
                    :deps  {environ/environ           {:mvn/version "1.2.0"}
                            fipp/fipp                 {:mvn/version "0.6.26"}
                            hato/hato                 {:mvn/version "0.9.0"}
-                           org.clojure/tools.logging {:mvn/version "1.3.0"}}}
+                           org.clojure/tools.logging {:mvn/version "1.2.4"}}}
   :test           {:extra-paths ["test"]
-                   :extra-deps  {org.clojure/test.check {:mvn/version "1.1.1"}}}
+                   :extra-deps  {org.clojure/test.check {:mvn/version "1.1.0"}}}
   :runner
   {:extra-deps {io.github.cognitect-labs/test-runner
                 {:git/url "https://github.com/cognitect-labs/test-runner"
-                 :sha     "7284cda41fb9edc0f3bc6b6185cfb7138fc8a023"}}
+                 :sha     "2d69f33d7980c3353b246c28f72ffeafbd9f2fab"}}
    :exec-fn    cognitect.test-runner.api/test}
   ;; clj -T:build client-jar && clj -T:install-client
-  :install-client {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}
+  :install-client {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :local
                                   :artifact  "target/keg-party-client.jar"}}
   ;; clj -T:build client-jar && CLOJARS_USERNAME=$USERNAME CLOJARS_PASSWORD=$TOKEN clj -X:deploy-client
-  :deploy-client  {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.2"}}
+  :deploy-client  {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
                    :exec-fn      deps-deploy.deps-deploy/deploy
                    :exec-args    {:installer :remote
                                   :artifact  "target/keg-party-client.jar"}}
   ;; `clj -T:build server-uberjar` for the server uberjar
   ;; `clj -T:build client-jar` for the client jar
   :build          {:paths      ["build"]
-                   :deps       {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
+                   :deps       {io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}}
                    :ns-default build}}}
