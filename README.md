@@ -13,7 +13,7 @@ Start your party with this easy one-liner:
 ```shell
 clojure -Sdeps '{:deps {com.github.markbastian/keg-party
                   {:git/url "https://github.com/markbastian/keg-party"
-                  :sha     "61196367e42442ebe358752bec0eb258e18be08d"}}}' \
+                  :sha     "61acf0a731df04fc55af564ce939cffbe544e255"}}}' \
                    -X keg-party.main/run
 ```
 
@@ -83,6 +83,10 @@ Whether you are logging in to an existing account or creating a new one, you'll 
 ![feed.png](doc/feed.png)
 
 Start playing around and have some fun!
+
+## Presentations
+
+- [Visual Tools Meetup crib sheet from 2024-06-07](./doc/presentation.md)
 
 ## License
 
